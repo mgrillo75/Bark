@@ -1,12 +1,11 @@
-﻿using System;
-using UnityEngine;
-using Bark.Gestures;
+﻿using Bark.Extensions;
 using Bark.GUI;
-using Bark.Tools;
-using Bark.Extensions;
-using GorillaLocomotion;
-using BepInEx.Configuration;
 using Bark.Interaction;
+using Bark.Tools;
+using BepInEx.Configuration;
+using System;
+using UnityEngine;
+using Player = GorillaLocomotion.GTPlayer;
 using Random = UnityEngine.Random;
 
 namespace Bark.Modules.Movement
@@ -72,7 +71,7 @@ namespace Bark.Modules.Movement
 
         public Vector3 AddedVelocity()
         {
-            return rocketL.force + rocketR.force;
+            return rocketL.Force + rocketR.Force;
         }
 
         protected override void Cleanup()
@@ -137,7 +136,7 @@ namespace Bark.Modules.Movement
     public class Rocket : BarkGrabbable
     {
         public float power = 5f, volume = .2f;
-        public Vector3 force { get; private set; }
+        public Vector3 Force { get; private set; }
         bool isLeft;
         GestureTracker gt;
         Rigidbody rb;
@@ -156,7 +155,7 @@ namespace Bark.Modules.Movement
             this.isLeft = isLeft;
             gt = GestureTracker.Instance;
 
-            if(isLeft)
+            if (isLeft)
                 gt.leftGrip.OnPressed += Attach;
             else
                 gt.rightGrip.OnPressed += Attach;
@@ -178,17 +177,17 @@ namespace Bark.Modules.Movement
         void FixedUpdate()
         {
             Player player = Player.Instance;
-            force = this.transform.forward * this.power * Time.fixedDeltaTime * Player.Instance.scale;
+            Force = this.transform.forward * this.power * Time.fixedDeltaTime * Player.Instance.scale;
             if (Selected)
-                player.AddForce(force);
+                player.AddForce(Force);
             else
             {
-                rb.velocity += force * 10;
-                force = Vector3.zero;
+                rb.linearVelocity += Force * 10;
+                Force = Vector3.zero;
                 transform.Rotate(Random.insideUnitSphere);
             }
             this.exhaustSound.volume = Mathf.Lerp(.5f, 0, Vector3.Distance(
-                player.headCollider.transform.position, 
+                player.headCollider.transform.position,
                 transform.position
             ) / 20f) * volume;
         }
@@ -196,7 +195,7 @@ namespace Bark.Modules.Movement
         public override void OnDeselect(BarkInteractor interactor)
         {
             base.OnDeselect(interactor);
-            rb.velocity = Player.Instance.currentVelocity;
+            rb.linearVelocity = Player.Instance.currentVelocity;
         }
 
         public void SetupInteraction()

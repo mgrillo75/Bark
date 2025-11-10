@@ -1,15 +1,16 @@
-﻿using Bark.Tools;
+﻿using Bark.Extensions;
+using Bark.GUI;
+using Bark.Interaction;
+using Bark.Modules.Teleportation;
+using Bark.Tools;
+using BepInEx.Configuration;
+using GorillaLocomotion.Climbing;
+using GorillaLocomotion.Gameplay;
+using HarmonyLib;
 using System;
 using UnityEngine;
-using Bark.Extensions;
-using Bark.Gestures;
-using Bark.GUI;
-using GorillaLocomotion.Gameplay;
-using GorillaLocomotion.Climbing;
-using HarmonyLib;
-using BepInEx.Configuration;
 using UnityEngine.XR;
-using GorillaLocomotion;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Modules.Movement
 {
@@ -79,7 +80,7 @@ namespace Bark.Modules.Movement
 
         void HideLauncher()
         {
-            launcher.GetComponent<MeshRenderer>().enabled = false;;
+            launcher.GetComponent<MeshRenderer>().enabled = false; ;
             gunStartHook.SetActive(false);
             gunEndHook.SetActive(false);
             //foreach (var system in smokeSystems)
@@ -88,9 +89,9 @@ namespace Bark.Modules.Movement
 
         void Fire(InputTracker _)
         {
-            if(!launcher.activeSelf) return;
+            if (!launcher.activeSelf) return;
             audioFire.Play();
-            
+
             GestureTracker.Instance.HapticPulse(hand == XRNode.LeftHand, 1, .25f);
             foreach (var system in smokeSystems)
             {
@@ -111,7 +112,7 @@ namespace Bark.Modules.Movement
         int nextZipline;
         void ResetHooks()
         {
-            if(!launcher.activeSelf) return;
+            if (!launcher.activeSelf) return;
             GestureTracker.Instance.HapticPulse(hand == XRNode.LeftHand);
             gunStartHook.SetActive(true);
             gunEndHook.SetActive(true);
@@ -280,9 +281,9 @@ namespace Bark.Modules.Movement
         {
             settings.gravityMulti = GravityMultiplier.Value / 5f;
             ResizeArray(MaxZiplines.Value);
-            
+
             UnsubscribeFromEvents();
-            
+
             hand = LauncherHand.Value == "left"
                 ? XRNode.LeftHand : XRNode.RightHand;
 

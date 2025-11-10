@@ -1,10 +1,10 @@
-﻿using Bark.Tools;
+﻿using Bark.Extensions;
+using Bark.GUI;
+using Bark.Interaction;
+using Bark.Tools;
+using GorillaLocomotion.Climbing;
 using System;
 using UnityEngine;
-using Bark.Extensions;
-using Bark.Gestures;
-using Bark.GUI;
-using GorillaLocomotion.Climbing;
 using Sound = Bark.Tools.Sounds.Sound;
 
 namespace Bark.Modules.Movement
@@ -72,7 +72,7 @@ namespace Bark.Modules.Movement
 
                 if (colliders.Length > 0)
                 {
-                    foreach(var collider in colliders)
+                    foreach (var collider in colliders)
                     {
                         Logging.Debug("Hit", collider.gameObject.name);
                     }

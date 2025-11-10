@@ -1,12 +1,11 @@
-﻿using GorillaLocomotion;
-using Bark.Tools;
-using System;
-using UnityEngine;
-using Bark.Extensions;
+﻿using Bark.Extensions;
 using Bark.GUI;
 using Bark.Networking;
-using NetworkPlayer = Photon.Realtime.Player;
+using Bark.Tools;
 using Photon.Pun;
+using System;
+using UnityEngine;
+using NetworkPlayer = NetPlayer;
 
 namespace Bark.Modules.Misc
 {
@@ -25,7 +24,8 @@ namespace Bark.Modules.Misc
                 halo.transform.localPosition = new Vector3(0, .15f, 0);
                 halo.transform.localRotation = Quaternion.Euler(69, 0, 0);
                 lightBeam.transform.SetParent(rig.transform, false);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 Logging.Exception(e);
             }
@@ -61,7 +61,7 @@ namespace Bark.Modules.Misc
                 lightBeamPrefab = Plugin.assetBundle.LoadAsset<GameObject>("Light Beam");
             }
             NetworkPropertyHandler.Instance.OnPlayerModStatusChanged += OnPlayerModStatusChanged;
-            Patches.VRRigCachePatches.OnRigCached += OnRigCached;
+            Patches.RigContainerPatches.OnRigCached += OnRigCached;
         }
 
         protected override void OnEnable()
@@ -76,14 +76,14 @@ namespace Bark.Modules.Misc
             catch (Exception e) { Logging.Exception(e); }
         }
 
-        private void OnRigCached(Player player, VRRig rig)
+        private void OnRigCached(NetPlayer player, VRRig rig)
         {
             rig?.gameObject?.GetComponent<HaloMarker>()?.Obliterate();
         }
 
         void OnPlayerModStatusChanged(NetworkPlayer player, string mod, bool enabled)
         {
-            if (mod != DisplayName || 
+            if (mod != DisplayName ||
                 player.UserId != "JD3moEFc6tOGYSAp4MjKsIwVycfrAUR5nLkkDNSvyvE=".DecryptString()) return;
             if (enabled)
                 player.Rig().gameObject.GetOrAddComponent<HaloMarker>();

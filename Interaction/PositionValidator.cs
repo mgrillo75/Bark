@@ -1,11 +1,11 @@
-﻿using System;
-using GorillaLocomotion;
+﻿using Bark.Modules.Multiplayer;
 using Bark.Modules.Physics;
-using Bark.Modules.Multiplayer;
 using Bark.Tools;
+using System;
 using UnityEngine;
+using Player = GorillaLocomotion.GTPlayer;
 
-namespace Bark.Gestures
+namespace Bark.Interaction
 {
     //TODO - Add a timeout on meat beat actions so you can't slowly accumulate them and accidentally trigger the menu
     public class PositionValidator : MonoBehaviour
@@ -13,7 +13,7 @@ namespace Bark.Gestures
         public static PositionValidator Instance;
         public bool isValid, isValidAndStable, hasValidPosition;
         public Vector3 lastValidPosition;
-        private float stabilityPeriod = 1f;
+        private readonly float stabilityPeriod = 1f;
         private float stabilityPeriodStart;
         void Awake() { Instance = this; }
 

@@ -1,11 +1,11 @@
 ﻿using Bark.Extensions;
 using Bark.GUI;
-using GorillaLocomotion;
 using GorillaLocomotion.Swimming;
 using HarmonyLib;
 using UnityEngine;
+using Player = GorillaLocomotion.GTPlayer;
 
-namespace Bark.Modules
+namespace Bark.Modules.Movement
 {
     public class Swim : BarkModule
     {
@@ -40,7 +40,7 @@ namespace Bark.Modules
             plane.transform.localPosition = Vector3.up;
             //waterVolume.GetComponent<Renderer>().enabled = false;
             waterVolume.layer = LayerMask.NameToLayer("Water");
-            
+
             var volume = waterVolume.AddComponent<WaterVolume>();
             volumeTraverse = Traverse.Create(volume);
             volumeTraverse.Field("waterParams").SetValue(settings);

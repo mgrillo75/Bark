@@ -1,4 +1,4 @@
-﻿namespace Bark.GUI
+﻿namespace Bark.GUI.WithoutCI
 {
     public static class CI
     {

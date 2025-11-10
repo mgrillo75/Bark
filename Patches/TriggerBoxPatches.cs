@@ -10,7 +10,7 @@ namespace Bark.Patches
         public static bool triggersEnabled = true;
 
         [HarmonyPatch(typeof(GorillaGeoHideShowTrigger))]
-        [HarmonyPatch("OnBoxTriggered", MethodType.Normal)]
+        [HarmonyPatch(nameof(GorillaGeoHideShowTrigger.OnBoxTriggered), MethodType.Normal)]
         internal class GeoTriggerPatches
         {
             private static bool Prefix()
@@ -20,7 +20,7 @@ namespace Bark.Patches
         }
 
         [HarmonyPatch(typeof(GorillaNetworkDisconnectTrigger))]
-        [HarmonyPatch("OnBoxTriggered", MethodType.Normal)]
+        [HarmonyPatch(nameof(GorillaNetworkDisconnectTrigger.OnBoxTriggered), MethodType.Normal)]
         internal class DisconnectTriggerPatches
         {
             private static bool Prefix()
@@ -30,7 +30,7 @@ namespace Bark.Patches
         }
 
         [HarmonyPatch(typeof(GorillaNetworkJoinTrigger))]
-        [HarmonyPatch("OnBoxTriggered", MethodType.Normal)]
+        [HarmonyPatch(nameof(GorillaNetworkJoinTrigger.OnBoxTriggered), MethodType.Normal)]
         internal class JoinTriggerPatches
         {
             private static bool Prefix()
@@ -40,7 +40,7 @@ namespace Bark.Patches
         }
 
         [HarmonyPatch(typeof(GorillaQuitBox))]
-        [HarmonyPatch("OnBoxTriggered", MethodType.Normal)]
+        [HarmonyPatch(nameof(GorillaQuitBox.OnBoxTriggered), MethodType.Normal)]
         internal class QuitTriggerPatches
         {
             private static bool Prefix()
@@ -55,18 +55,8 @@ namespace Bark.Patches
         }
 
         [HarmonyPatch(typeof(GorillaSetZoneTrigger))]
-        [HarmonyPatch("OnBoxTriggered", MethodType.Normal)]
+        [HarmonyPatch(nameof(GorillaSetZoneTrigger.OnBoxTriggered), MethodType.Normal)]
         internal class ZoneTriggerPatches
-        {
-            private static bool Prefix()
-            {
-                return triggersEnabled;
-            }
-        }
-
-        [HarmonyPatch(typeof(GorillaKeyboardButton))]
-        [HarmonyPatch("OnTriggerEnter", MethodType.Normal)]
-        internal class KeyboardButtonPatches
         {
             private static bool Prefix()
             {

@@ -1,6 +1,5 @@
 ﻿using Bark.GUI;
 using Bark.Patches;
-using BepInEx.Configuration;
 
 namespace Bark.Modules.Physics
 {

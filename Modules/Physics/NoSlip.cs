@@ -1,12 +1,9 @@
 ﻿using Bark.GUI;
 using Bark.Patches;
-using BepInEx.Configuration;
-using GorillaLocomotion;
-using UnityEngine;
 
 namespace Bark.Modules.Physics
 {
-    public class NoSlip: BarkModule
+    public class NoSlip : BarkModule
     {
         public static readonly string DisplayName = "No Slip";
         public static NoSlip Instance;
@@ -21,9 +18,9 @@ namespace Bark.Modules.Physics
                 SlipperyHands.Instance.enabled = false;
         }
 
-        protected override void Cleanup() 
+        protected override void Cleanup()
         {
-            string s = $"The functionality for this module is in {nameof(SlidePatch) }";
+            string s = $"The functionality for this module is in {nameof(SlidePatch)}";
         }
 
         public override string GetDisplayName()

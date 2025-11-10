@@ -1,12 +1,11 @@
-﻿using System;
-using UnityEngine;
-using Bark.Tools;
-using Bark.Interaction;
+﻿using Bark.Tools;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.XR;
 
 
-namespace Bark.Gestures
+namespace Bark.Interaction
 {
     public class BarkInteractor : MonoBehaviour
     {
@@ -32,22 +31,22 @@ namespace Bark.Gestures
         {
             try
             {
-                IsLeft = this.name.Contains("Left");
-                this.gameObject.AddComponent<SphereCollider>().isTrigger = true;
-                this.gameObject.layer = InteractionLayer;
+                IsLeft = name.Contains("Left");
+                gameObject.AddComponent<SphereCollider>().isTrigger = true;
+                gameObject.layer = InteractionLayer;
 
                 var gt = GestureTracker.Instance;
-                this.device = IsLeft ?
+                device = IsLeft ?
                     gt.leftController :
                     gt.rightController;
-                this.node = IsLeft ? XRNode.LeftHand : XRNode.RightHand;
+                node = IsLeft ? XRNode.LeftHand : XRNode.RightHand;
 
-                gt.GetInputTracker("grip", this.node).OnPressed += OnGrip;
-                gt.GetInputTracker("grip", this.node).OnReleased += OnGripRelease;
-                gt.GetInputTracker("trigger", this.node).OnPressed += OnTrigger;
-                gt.GetInputTracker("trigger", this.node).OnReleased += OnTriggerRelease;
-                gt.GetInputTracker("primary", this.node).OnPressed += OnPrimary;
-                gt.GetInputTracker("primary", this.node).OnReleased += OnPrimaryRelease;
+                gt.GetInputTracker("grip", node).OnPressed += OnGrip;
+                gt.GetInputTracker("grip", node).OnReleased += OnGripRelease;
+                gt.GetInputTracker("trigger", node).OnPressed += OnTrigger;
+                gt.GetInputTracker("trigger", node).OnReleased += OnTriggerRelease;
+                gt.GetInputTracker("primary", node).OnPressed += OnPrimary;
+                gt.GetInputTracker("primary", node).OnReleased += OnPrimaryRelease;
             }
             catch (Exception e) { Logging.Exception(e); }
         }

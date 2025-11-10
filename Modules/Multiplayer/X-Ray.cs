@@ -4,7 +4,6 @@ using Bark.Tools;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using GorillaLocomotion;
 
 namespace Bark.Modules.Multiplayer
 {
@@ -20,8 +19,7 @@ namespace Bark.Modules.Multiplayer
             {
                 try
                 {
-                    if (!rig?.PhotonView()) continue;
-                    if ((bool)rig?.PhotonView()?.Owner?.IsLocal) continue;
+                    if (rig.isOfflineVRRig || rig.isLocal) continue;
 
                     var marker = rig.gameObject.GetComponent<XRayMarker>();
                     if (!marker)
@@ -33,8 +31,6 @@ namespace Bark.Modules.Multiplayer
                 {
                     Logging.Exception(e);
                     Logging.Debug("rig is null:", rig is null);
-                    Logging.Debug("rig?.PhotonView() is null:", rig?.PhotonView() is null);
-                    Logging.Debug("rig?.PhotonView()?.Owner is null:", rig?.PhotonView()?.Owner is null);
                     Logging.Debug("rig?.gameObject is null:", rig?.gameObject is null);
                 }
             }
@@ -82,7 +78,7 @@ namespace Bark.Modules.Multiplayer
         protected override void OnEnable()
         {
             if (!MenuController.Instance.Built) return;
-            Patches.VRRigCachePatches.OnRigCached += OnRigCached;
+            Patches.RigContainerPatches.OnRigCached += OnRigCached;
             base.OnEnable();
             markers = new List<XRayMarker>();
             ApplyMaterial();
@@ -91,7 +87,7 @@ namespace Bark.Modules.Multiplayer
         protected override void Cleanup()
         {
             if (!MenuController.Instance.Built) return;
-            Patches.VRRigCachePatches.OnRigCached += OnRigCached;
+            Patches.RigContainerPatches.OnRigCached += OnRigCached;
             if (markers is null) return;
             foreach (var marker in markers)
             {
@@ -100,7 +96,7 @@ namespace Bark.Modules.Multiplayer
             }
         }
 
-        void OnRigCached(Player player, VRRig rig)
+        void OnRigCached(NetPlayer player, VRRig rig)
         {
             try
             {
@@ -144,7 +140,7 @@ namespace Bark.Modules.Multiplayer
                 faceMaterial.renderQueue = 5000;
                 chestMaterial = Instantiate(xray);
                 chestMaterial.renderQueue = 5000;
-                
+
                 baseSkin = ReplaceMaterial(rig.mainSkin, skinMaterial);
                 chest = rig.transform.Find("rig/body/gorillachest").GetComponent<Renderer>();
                 baseChest = ReplaceMaterial(chest, chestMaterial);

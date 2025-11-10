@@ -105,7 +105,7 @@
             SharkRelease = 201,
             TentBounce = 202,
         }
-        public static void Play(int sound, float volume = 0.1f, bool isLeft=false)
+        public static void Play(int sound, float volume = 0.1f, bool isLeft = false)
         {
             GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(sound, isLeft, volume);
         }

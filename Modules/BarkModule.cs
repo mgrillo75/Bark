@@ -89,7 +89,8 @@ namespace Bark.Modules
                     return string.Compare(xValue, yValue);
                 });
                 return types;
-            } catch (ReflectionTypeLoadException ex)
+            }
+            catch (ReflectionTypeLoadException ex)
             {
                 Logging.Exception(ex);
                 Logging.Warning("Inner exceptions:");

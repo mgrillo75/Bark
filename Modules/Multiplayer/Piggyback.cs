@@ -1,14 +1,13 @@
 ﻿using Bark.GUI;
-using Bark.Gestures;
-using Bark.Patches;
+using Bark.Interaction;
 using Bark.Modules.Physics;
-using GorillaLocomotion;
-using UnityEngine;
-using UnityEngine.XR;
-using Bark.Extensions;
+using Bark.Networking;
+using Bark.Patches;
 using Bark.Tools;
 using System;
-using Bark.Networking;
+using UnityEngine;
+using UnityEngine.XR;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Modules.Multiplayer
 {
@@ -87,7 +86,7 @@ namespace Bark.Modules.Multiplayer
             {
                 try
                 {
-                    if (rig.PhotonView().Owner.IsLocal)
+                    if (rig.isOfflineVRRig || rig.isLocal)
                     {
                         continue;
                     }

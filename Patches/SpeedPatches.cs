@@ -1,25 +1,23 @@
-﻿using HarmonyLib;
-using Bark.Modules.Movement;
-using Bark.Modules;
+﻿using Bark.Modules.Movement;
 using Bark.Tools;
+using HarmonyLib;
 using System;
-using AA;
-using GorillaLocomotion;
 using UnityEngine;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Patches
 {
     [HarmonyPatch(typeof(GorillaTagManager))]
-    [HarmonyPatch("LocalPlayerSpeed", MethodType.Normal)]
+    [HarmonyPatch(nameof(GorillaTagManager.LocalPlayerSpeed), MethodType.Normal)]
     internal class TagSpeedPatch
     {
-        private static void Postfix(GorillaTagManager __instance, ref float[] __result)
+        private static void Postfix(ref float[] __result)
         {
             try
             {
                 if (!SpeedBoost.active) return;
 
-                for (int i = 0; i < __result.Length; i++)
+                for (var i = 0; i < __result.Length; i++)
                     __result[i] *= SpeedBoost.scale;
             }
             catch (Exception e) { Logging.Exception(e); }
@@ -27,10 +25,10 @@ namespace Bark.Patches
     }
 
     [HarmonyPatch(typeof(GorillaGameManager))]
-    [HarmonyPatch("LocalPlayerSpeed", MethodType.Normal)]
+    [HarmonyPatch(nameof(GorillaGameManager.LocalPlayerSpeed), MethodType.Normal)]
     internal class GenericSpeedPatch
     {
-        private static void Postfix(GorillaGameManager __instance, ref float[] __result)
+        private static void Postfix(ref float[] __result)
         {
             try
             {
@@ -43,11 +41,11 @@ namespace Bark.Patches
         }
     }
 
-    [HarmonyPatch(typeof(GorillaBattleManager))]
-    [HarmonyPatch("LocalPlayerSpeed", MethodType.Normal)]
+    [HarmonyPatch(typeof(GorillaPaintbrawlManager))]
+    [HarmonyPatch(nameof(GorillaPaintbrawlManager.LocalPlayerSpeed), MethodType.Normal)]
     internal class BattleSpeedPatch
     {
-        private static void Postfix(GorillaBattleManager __instance, ref float[] __result)
+        private static void Postfix(ref float[] __result)
         {
             try
             {
@@ -61,10 +59,10 @@ namespace Bark.Patches
     }
 
     [HarmonyPatch(typeof(GorillaHuntManager))]
-    [HarmonyPatch("LocalPlayerSpeed", MethodType.Normal)]
+    [HarmonyPatch(nameof(GorillaHuntManager.LocalPlayerSpeed), MethodType.Normal)]
     internal class HuntSpeedPatch
     {
-        private static void Postfix(GorillaHuntManager __instance, ref float[] __result)
+        private static void Postfix(ref float[] __result)
         {
             try
             {
@@ -78,7 +76,7 @@ namespace Bark.Patches
     }
 
     [HarmonyPatch(typeof(Player))]
-    [HarmonyPatch("GetSwimmingVelocityForHand", MethodType.Normal)]
+    [HarmonyPatch(nameof(Player.GetSwimmingVelocityForHand), MethodType.Normal)]
     internal class SwimmingVelocityPatch
     {
         private static void Postfix(ref Vector3 swimmingVelocityChange)

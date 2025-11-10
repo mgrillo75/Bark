@@ -1,16 +1,16 @@
-﻿using GorillaLocomotion;
-using Bark.Extensions;
-using Bark.Gestures;
+﻿using Bark.Extensions;
 using Bark.GUI;
+using Bark.Interaction;
 using Bark.Patches;
 using Bark.Tools;
+using BepInEx.Configuration;
 using System;
 using System.Collections;
 using UnityEngine;
+using Player = GorillaLocomotion.GTPlayer;
 using Random = UnityEngine.Random;
-using BepInEx.Configuration;
 
-namespace Bark.Modules
+namespace Bark.Modules.Teleportation
 {
     public class Teleport : BarkModule
     {
@@ -39,7 +39,7 @@ namespace Bark.Modules
 
         private void OnIlluminati()
         {
-            if (this.enabled)
+            if (enabled)
             {
                 if (!isTeleporting)
                 {

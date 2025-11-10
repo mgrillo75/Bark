@@ -1,17 +1,16 @@
-﻿using Bark.Extensions;
-using UnityEngine;
-using System;
-using UnityEngine.UI;
-using System.Collections.Generic;
-using Bark;
-using Bark.Tools;
-using Bark.Modules;
-using System.Reflection;
-using static Bark.Extensions.ConfigExtensions;
-using BepInEx.Configuration;
-using Bark.Gestures;
-using Bark.Interaction;
+﻿using Bark;
+using Bark.Extensions;
 using Bark.GUI;
+using Bark.Interaction;
+using Bark.Modules;
+using Bark.Tools;
+using BepInEx.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using UnityEngine;
+using UnityEngine.UI;
+using static Bark.Extensions.ConfigExtensions;
 
 public class SettingsPage : MonoBehaviour
 {
@@ -116,10 +115,10 @@ public class SettingsPage : MonoBehaviour
     public void UpdateText()
     {
         if (entry is null) return;
-        MenuController.Instance.helpText.text = 
+        MenuController.Instance.helpText.text =
             $"{modSelector.Selected} > {configSelector.Selected}\n" +
             "-----------------------------------\n" +
-            entry.Description.Description + 
+            entry.Description.Description +
             $"\n\nDefault: {entry.DefaultValue}";
     }
 }

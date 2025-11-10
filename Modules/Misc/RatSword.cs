@@ -1,6 +1,6 @@
 ﻿using Bark.Extensions;
-using Bark.Gestures;
 using Bark.GUI;
+using Bark.Interaction;
 using Bark.Tools;
 using System;
 using UnityEngine;

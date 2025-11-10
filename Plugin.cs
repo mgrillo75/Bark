@@ -1,29 +1,28 @@
-﻿using BepInEx;
-using System;
-using UnityEngine;
-using Utilla;
+﻿using Bark.Extensions;
 using Bark.GUI;
-using Bark.Tools;
-using Bark.Extensions;
-using BepInEx.Configuration;
-using System.IO;
+using Bark.GUI.WithoutCI;
+using Bark.Interaction;
 using Bark.Modules;
-using System.Reflection;
-using Bark.Gestures;
 using Bark.Networking;
-using GorillaLocomotion;
-using UnityEngine.UI;
-using HarmonyLib;
-using System.Collections;
+using Bark.Patches;
+using Bark.Tools;
+using BepInEx;
+using BepInEx.Configuration;
 using GorillaNetworking;
-using Photon.Pun;
+using GorillaTagScripts;
+using System;
+using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.UI;
+using Utilla.Attributes;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark
 {
-    [ModdedGamemode]
-    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.5.0")]
+    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.5.0"), ModdedGamemode]
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
-
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance;
@@ -34,7 +33,7 @@ namespace Bark
         public static GameObject monkeMenuPrefab;
         public static ConfigFile configFile;
         public static bool IsSteam { get; protected set; }
-        public static bool DebugMode { get; protected set; } = false;
+
         GestureTracker gt;
         NetworkPropertyHandler nph;
 
@@ -46,7 +45,7 @@ namespace Bark
             try
             {
                 gt = this.gameObject.GetOrAddComponent<GestureTracker>();
-                nph = this.gameObject.GetOrAddComponent<NetworkPropertyHandler>();  
+                nph = this.gameObject.GetOrAddComponent<NetworkPropertyHandler>();
                 menuController = Instantiate(monkeMenuPrefab).AddComponent<MenuController>();
             }
             catch (Exception e)
@@ -96,7 +95,7 @@ namespace Bark
             {
                 Logging.Debug("Start");
                 Utilla.Events.GameInitialized += OnGameInitialized;
-                assetBundle = AssetUtils.LoadAssetBundle("Bark/Resources/barkbundle");
+                assetBundle = Tools.AssetUtils.LoadAssetBundle("Bark/Resources/barkbundle");
                 monkeMenuPrefab = assetBundle.LoadAsset<GameObject>("Bark Menu");
             }
             catch (Exception e)
@@ -106,6 +105,95 @@ namespace Bark
         }
 
         public static Text debugText;
+
+        void OnEnable()
+        {
+            try
+            {
+                Logging.Debug("OnEnable");
+                this.pluginEnabled = true;
+                HarmonyPatches.ApplyHarmonyPatches();
+                if (initialized)
+                    Setup();
+            }
+            catch (Exception e)
+            {
+                Logging.Exception(e);
+            }
+        }
+
+        void OnDisable()
+        {
+            try
+            {
+                Logging.Debug("OnDisable");
+                this.pluginEnabled = false;
+                HarmonyPatches.RemoveHarmonyPatches();
+                Cleanup();
+            }
+            catch (Exception e)
+            {
+                Logging.Exception(e);
+            }
+        }
+
+        void OnGameInitialized(object sender, EventArgs e)
+        {
+            try
+            {
+                Logging.Debug("OnGameInitialized");
+                initialized = true;
+                string platform = PlayFabAuthenticator.instance.platform.ToString();
+                Logging.Info("Platform: ", platform);
+                IsSteam = platform.ToLower().Contains("steam");
+
+#if DEBUG
+                CreateDebugGUI();
+#endif
+            }
+            catch (Exception ex)
+            {
+                Logging.Exception(ex);
+            }
+        }
+
+        [ModdedGamemodeJoin]
+        void RoomJoined()
+        {
+            Logging.Debug("RoomJoined");
+            inRoom = true;
+            Setup();
+        }
+
+        [ModdedGamemodeLeave]
+        void RoomLeft()
+        {
+            Logging.Debug("RoomLeft");
+            inRoom = false;
+            Cleanup();
+        }
+
+        public async void JoinLobby(string name, string gamemode)
+        {
+            if (FriendshipGroupDetection.Instance.IsInParty)
+            {
+                FriendshipGroupDetection.Instance.LeaveParty();
+                await Task.Delay(1000);
+            }
+
+            await NetworkSystem.Instance.ReturnToSinglePlayer();
+
+            string gamemodeCache = GorillaComputer.instance.currentGameMode.Value;
+            Logging.Debug("Changing gamemode from", gamemodeCache, "to", gamemode);
+            GorillaComputer.instance.SetGameModeWithoutButton(gamemode);
+
+            await PhotonNetworkController.Instance.AttemptToJoinSpecificRoomAsync(name, JoinType.Solo, null);
+
+            GorillaComputer.instance.SetGameModeWithoutButton(gamemodeCache);
+        }
+
+#if DEBUG
+
         void CreateDebugGUI()
         {
             try
@@ -148,97 +236,6 @@ namespace Bark
             }
         }
 
-        void OnEnable()
-        {
-            try
-            {
-                Logging.Debug("OnEnable");
-                this.pluginEnabled = true;
-                HarmonyPatches.ApplyHarmonyPatches();
-                if (initialized)
-                    Setup();
-            }
-            catch (Exception e)
-            {
-                Logging.Exception(e);
-            }
-        }
-
-        void OnDisable()
-        {
-            try
-            {
-                Logging.Debug("OnDisable");
-                this.pluginEnabled = false;
-                HarmonyPatches.RemoveHarmonyPatches();
-                Cleanup();
-            }
-            catch (Exception e)
-            {
-                Logging.Exception(e);
-            }
-        }
-
-        void OnGameInitialized(object sender, EventArgs e)
-        {
-            try
-            {
-                Logging.Debug("OnGameInitialized");
-                initialized = true;
-                string platform = (string)Traverse.Create(GorillaNetworking.PlayFabAuthenticator.instance).Field("platform").GetValue();
-                Logging.Info("Platform: ", platform);
-                IsSteam = platform.ToLower().Contains("steam");
-                if (DebugMode)
-                    CreateDebugGUI();
-            }
-            catch (Exception ex)
-            {
-                Logging.Exception(ex);
-            }
-        }
-
-        [ModdedGamemodeJoin]
-        void RoomJoined(string gamemode)
-        {
-            Logging.Debug("RoomJoined");
-            inRoom = true;
-            Setup();
-        }
-
-        [ModdedGamemodeLeave]
-        void RoomLeft(string gamemode)
-        {
-            Logging.Debug("RoomLeft");
-            inRoom = false;
-            Cleanup();
-        }
-
-        public void JoinLobby(string name, string gamemode)
-        {
-            StartCoroutine(JoinLobbyInternal(name, gamemode));
-        }
-
-        IEnumerator JoinLobbyInternal(string name, string gamemode)
-        {
-            PhotonNetworkController.Instance.AttemptDisconnect();
-            do
-            {
-                yield return new WaitForSeconds(1f);
-                Logging.Debug("Waiting to disconnect");
-            }
-            while (PhotonNetwork.InRoom);
-            
-            string gamemodeCache = GorillaComputer.instance.currentGameMode;
-            Logging.Debug("Changing gamemode from", gamemodeCache, "to", gamemode);
-            GorillaComputer.instance.currentGameMode = gamemode;
-            PhotonNetworkController.Instance.AttemptToJoinSpecificRoom(name);
-
-            while (!PhotonNetwork.InRoom)
-            {
-                yield return new WaitForSeconds(1f);
-                Logging.Debug("Waiting to connect");
-            }
-            GorillaComputer.instance.currentGameMode = gamemodeCache;
-        }
+#endif
     }
 }

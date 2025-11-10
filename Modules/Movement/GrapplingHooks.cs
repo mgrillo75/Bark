@@ -1,13 +1,12 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
-using Bark.Gestures;
+﻿using Bark.Extensions;
 using Bark.GUI;
-using Bark.Tools;
-using Bark.Extensions;
-using GorillaLocomotion;
-using BepInEx.Configuration;
 using Bark.Interaction;
+using Bark.Modules.Teleportation;
+using Bark.Tools;
+using BepInEx.Configuration;
+using System;
+using UnityEngine;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Modules.Movement
 {
@@ -273,7 +272,7 @@ namespace Bark.Modules.Movement
             if (isGrappling)
             {
                 var rigidBody = Player.Instance.bodyCollider.attachedRigidbody;
-                rigidBody.velocity +=
+                rigidBody.linearVelocity +=
                     transform.forward *
                     steerForce * Time.fixedDeltaTime * Player.Instance.scale;
             }

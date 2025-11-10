@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections;
-using Bark.GUI;
+﻿using Bark.GUI;
+using Bark.Modules.Movement;
+using Bark.Modules.Multiplayer;
 using Bark.Patches;
 using Bark.Tools;
-using GorillaLocomotion;
+using System;
+using System.Collections;
 using UnityEngine;
-using Bark.Modules.Multiplayer;
-using Bark.Modules.Movement;
-using BepInEx.Configuration;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Modules.Physics
 {
@@ -68,7 +67,7 @@ namespace Bark.Modules.Physics
             catch (Exception e) { Logging.Exception(e); }
         }
 
-        protected override void Cleanup() 
+        protected override void Cleanup()
         {
             StartCoroutine(CleanupRoutine());
         }

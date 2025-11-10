@@ -1,11 +1,12 @@
-﻿using Bark.Tools;
+﻿using Bark.Extensions;
+using Bark.GUI;
+using Bark.Interaction;
+using Bark.Modules.Teleportation;
+using Bark.Tools;
+using BepInEx.Configuration;
+using GorillaLocomotion.Climbing;
 using System;
 using UnityEngine;
-using Bark.Extensions;
-using Bark.Gestures;
-using Bark.GUI;
-using GorillaLocomotion.Climbing;
-using BepInEx.Configuration;
 using UnityEngine.XR;
 
 namespace Bark.Modules.Movement

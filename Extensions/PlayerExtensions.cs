@@ -1,9 +1,7 @@
 ﻿using Bark.Modules;
-using GorillaLocomotion;
-using HarmonyLib;
-using Photon.Pun;
 using System.Collections.Generic;
 using UnityEngine;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Extensions
 {
@@ -11,67 +9,58 @@ namespace Bark.Extensions
     {
         public static void AddForce(this Player self, Vector3 v)
         {
-            self.bodyCollider.attachedRigidbody.velocity += v;
+            self.AddForce(v, ForceMode.VelocityChange);
         }
 
         public static void SetVelocity(this Player self, Vector3 v)
         {
-            self.bodyCollider.attachedRigidbody.velocity = v;
-        }
-
-        public static PhotonView PhotonView(this VRRig rig)
-        {
-            //return rig.photonView;
-            return Traverse.Create(rig).Field("photonView").GetValue<PhotonView>();
+            self.SetPlayerVelocity(v);
         }
 
         public static T GetProperty<T>(this VRRig rig, string key)
         {
-            if(rig?.PhotonView()?.Owner is Photon.Realtime.Player player)
-                return (T)player?.CustomProperties[key];
-            return default(T);
+            if (rig?.rigContainer?.Creator is NetPlayer netPlayer)
+                return netPlayer.GetProperty<T>(key);
+            return default;
         }
 
         public static bool HasProperty(this VRRig rig, string key)
         {
-            if(rig?.PhotonView()?.Owner is Photon.Realtime.Player player)
-                return player.HasProperty(key);
+            if (rig?.rigContainer?.Creator is NetPlayer netPlayer)
+                return netPlayer.HasProperty(key);
             return false;
         }
 
         public static bool ModuleEnabled(this VRRig rig, string mod)
         {
-            if(rig?.PhotonView()?.Owner is Photon.Realtime.Player player)
-                return player.ModuleEnabled(mod);
+            if (rig?.rigContainer?.Creator is NetPlayer netPlayer)
+                return netPlayer.ModuleEnabled(mod);
             return false;
         }
 
-        public static T GetProperty<T>(this Photon.Realtime.Player player, string key)
+        public static T GetProperty<T>(this NetPlayer netPlayer, string key)
         {
-            return (T)player?.CustomProperties[key];
+            return (T)netPlayer.GetPlayerRef()?.CustomProperties[key];
         }
 
-        public static bool HasProperty(this Photon.Realtime.Player player, string key)
+        public static bool HasProperty(this NetPlayer netPlayer, string key)
         {
-            return !(player?.CustomProperties[key] is null);
+            return !(netPlayer.GetPlayerRef()?.CustomProperties[key] is null);
         }
 
-        public static bool ModuleEnabled(this Photon.Realtime.Player player, string mod)
+        public static bool ModuleEnabled(this NetPlayer netPlayer, string mod)
         {
-            if (!player.HasProperty(BarkModule.enabledModulesKey)) return false;
-            Dictionary<string, bool> enabledMods = player.GetProperty<Dictionary<string, bool>>(BarkModule.enabledModulesKey);
+            if (!netPlayer.HasProperty(BarkModule.enabledModulesKey)) return false;
+            Dictionary<string, bool> enabledMods = netPlayer.GetProperty<Dictionary<string, bool>>(BarkModule.enabledModulesKey);
             if (enabledMods is null || !enabledMods.ContainsKey(mod)) return false;
             return enabledMods[mod];
         }
 
-        public static VRRig Rig(this Photon.Realtime.Player player)
+        public static VRRig Rig(this Photon.Realtime.Player player) => NetPlayer.Get(player)?.Rig();
+
+        public static VRRig Rig(this NetPlayer netPlayer)
         {
-            foreach (var rig in GorillaParent.instance.vrrigs)
-            {
-                if (rig?.PhotonView()?.Owner == player)
-                    return rig;
-            }
-            return null;
+            return (netPlayer != null && VRRigCache.Instance.TryGetVrrig(netPlayer, out RigContainer playerRig)) ? playerRig.Rig : null;
         }
     }
 }

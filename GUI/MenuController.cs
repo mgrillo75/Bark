@@ -1,23 +1,22 @@
-﻿using System;
+﻿using Bark.Extensions;
+using Bark.Interaction;
+using Bark.Modules;
+using Bark.Modules.Misc;
+using Bark.Modules.Movement;
+using Bark.Modules.Multiplayer;
+using Bark.Modules.Physics;
+using Bark.Modules.Teleportation;
+using Bark.Tools;
+using BepInEx.Configuration;
+using Photon.Pun;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
-using Bark.Gestures;
-using Bark.Modules;
-using Bark.Modules.Movement;
-using Bark.Modules.Physics;
-using Bark.Modules.Multiplayer;
-using Bark.Modules.Teleportation;
-using Bark.Tools;
-using Bark.Interaction;
-using Bark.Extensions;
-using Player = GorillaLocomotion.Player;
-using BepInEx.Configuration;
-using UnityEngine.XR;
-using Bark.Modules.Misc;
-using Photon.Pun;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
+using UnityEngine.XR;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.GUI
 {
@@ -164,7 +163,7 @@ namespace Bark.GUI
         void ResetPosition()
         {
             _rigidbody.isKinematic = true;
-            _rigidbody.velocity = Vector3.zero;
+            _rigidbody.linearVelocity = Vector3.zero;
             transform.SetParent(Player.Instance.bodyCollider.transform);
             transform.localPosition = initialMenuOffset;
             transform.localRotation = Quaternion.identity;
@@ -227,8 +226,10 @@ namespace Bark.GUI
             var modPageTemplate = this.gameObject.transform.Find("Mod Page");
             int buttonsPerPage = modPageTemplate.childCount - 2; // Excludes the prev/next page btns
             int numPages = ((modules.Count - 1) / buttonsPerPage) + 1;
-            if (Plugin.DebugMode)
-                numPages++;
+
+#if DEBUG
+            numPages++;
+#endif
 
             modPages = new List<Transform>() { modPageTemplate };
             for (int i = 0; i < numPages - 1; i++)
@@ -269,7 +270,7 @@ namespace Bark.GUI
                         buttons.Add(btnController);
                         continue;
                     }
-                    else if (button.name == "Button Right" && modPage != modPages[modPages.Count - 1])
+                    else if (button.name == "Button Right" && modPage != modPages[^1])
                     {
                         var btnController = button.gameObject.AddComponent<ButtonController>();
                         btnController.OnPressed += NextPage;
@@ -313,12 +314,12 @@ namespace Bark.GUI
             {
                 if (isPressed)
                 {
-                    foreach (var c in FindObjectsOfType<Collider>())
+                    foreach (var c in FindObjectsByType<Collider>(FindObjectsSortMode.None))
                         c.gameObject.AddComponent<ColliderRenderer>();
                 }
                 else
                 {
-                    foreach (var c in FindObjectsOfType<ColliderRenderer>())
+                    foreach (var c in FindObjectsByType<ColliderRenderer>(FindObjectsSortMode.None))
                         c.Obliterate();
                 }
             });
@@ -327,7 +328,7 @@ namespace Bark.GUI
         int debugButtons = 0;
         private void AddDebugButton(string title, Action<ButtonController, bool> onPress)
         {
-            if (!Plugin.DebugMode) return;
+#if DEBUG
             var page = modPages.Last();
             var button = page.Find($"Button {debugButtons}").gameObject;
             var btnController = button.gameObject.AddComponent<ButtonController>();
@@ -335,6 +336,7 @@ namespace Bark.GUI
             btnController.SetText(title);
             buttons.Add(btnController);
             debugButtons++;
+#endif
         }
 
         private int pageIndex = 0;
@@ -377,7 +379,7 @@ namespace Bark.GUI
 
         public Material GetMaterial(string name)
         {
-            foreach (var renderer in FindObjectsOfType<Renderer>())
+            foreach (var renderer in FindObjectsByType<Renderer>(FindObjectsSortMode.None))
             {
                 string _name = renderer.material.name.ToLower();
                 if (_name.Contains(name))

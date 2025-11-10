@@ -1,15 +1,14 @@
-﻿using System;
-using UnityEngine;
-using Bark.Gestures;
+﻿using Bark.Extensions;
 using Bark.GUI;
-using Bark.Tools;
-using Bark.Extensions;
-using GorillaLocomotion;
-using BepInEx.Configuration;
 using Bark.Interaction;
-using System.Collections.Generic;
 using Bark.Networking;
+using Bark.Tools;
+using BepInEx.Configuration;
 using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Modules.Physics
 {
@@ -38,7 +37,7 @@ namespace Bark.Modules.Physics
                 bottlePrefab = Plugin.assetBundle.LoadAsset<GameObject>("Potion Bottle");
                 shrinkMaterial = Plugin.assetBundle.LoadAsset<Material>("Portal A Material");
                 growMaterial = Plugin.assetBundle.LoadAsset<Material>("Portal B Material");
-                Patches.VRRigCachePatches.OnRigCached += OnRigCached;
+                Patches.RigContainerPatches.OnRigCached += OnRigCached;
             }
             catch (Exception e)
             {
@@ -46,12 +45,12 @@ namespace Bark.Modules.Physics
             }
         }
 
-        void OnRigCached(Player player, VRRig rig)
+        void OnRigCached(NetPlayer player, VRRig rig)
         {
             try
             {
                 rig.transform.localScale = Vector3.one;
-                rig.scaleFactor = 1;
+                rig.nativeScale = rig.frameScale = rig.lastScaleFactor = 1f;
             }
             catch (Exception e)
             {
@@ -122,7 +121,7 @@ namespace Bark.Modules.Physics
             if (!shrink && !PositionValidator.Instance.isValidAndStable) return;
             float delta = shrink ? .99f : 1.01f;
             delta = Mathf.Clamp(sizeChanger.MinScale * delta, .03f, 20f);
-            if(delta < 1)
+            if (delta < 1)
                 potion.gulp.pitch = MathExtensions.Map(Player.Instance.scale, 0, 1, 1.5f, 1);
             else
                 potion.gulp.pitch = MathExtensions.Map(Player.Instance.scale, 1, 20, 1, .5f);
@@ -161,11 +160,12 @@ namespace Bark.Modules.Physics
                 try
                 {
                     rig.transform.localScale = Vector3.one;
-                    rig.scaleFactor = 1;
+                    rig.nativeScale = rig.frameScale = rig.lastScaleFactor = 1f;
                 }
-                catch (Exception e) { Logging.Exception(e); };
+                catch (Exception e) { Logging.Exception(e); }
+                ;
             }
-            foreach (SizeManager manager in FindObjectsOfType<SizeManager>())
+            foreach (SizeManager manager in FindObjectsByType<SizeManager>(FindObjectsSortMode.None))
             {
                 Traverse managerTraverse = Traverse.Create(manager);
                 Traverse scaleFromChanger = managerTraverse.Method("ScaleFromChanger");
@@ -178,7 +178,7 @@ namespace Bark.Modules.Physics
                         if (!t) continue;
                         float scale = scaleFromChanger.GetValue<float>(controllingChanger.GetValue<SizeChanger>(t), t);
                         t.localScale = Vector3.one * scale;
-                        manager.targetRig.scaleFactor = scale;
+                        manager.targetRig.ScaleMultiplier = scale;
                         NetworkPropertyHandler.Instance?.ChangeProperty(playerSizeKey, Player.Instance.scale);
                     }
                     else
@@ -187,10 +187,11 @@ namespace Bark.Modules.Physics
                         var player = manager.targetPlayer;
                         float scale = scaleFromChanger.GetValue<float>(controllingChanger.GetValue<SizeChanger>(t), t);
                         player.turnParent.transform.localScale = Vector3.one * scale;
-                        player.scale = scale;
+                        player.SetScaleMultiplier(scale);
                     }
                 }
-                catch (Exception e) { Logging.Exception(e); };
+                catch (Exception e) { Logging.Exception(e); }
+                ;
             }
         }
 
@@ -335,13 +336,13 @@ namespace Bark.Modules.Physics
                 inRange = Vector3.Dot(delta, Vector3.up) > 0f && delta.magnitude < range * Player.Instance.scale;
                 if (isFlipped && inRange)
                 {
-                    if(!gulp.isPlaying)
+                    if (!gulp.isPlaying)
                         gulp.Play();
                     OnDrink?.Invoke(this);
                 }
                 else
                 {
-                    if(gulp.isPlaying)
+                    if (gulp.isPlaying)
                         gulp.Stop();
                 }
             }
@@ -439,7 +440,7 @@ namespace Bark.Modules.Physics
         {
             transform.SetParent(null);
             rb.isKinematic = false;
-            rb.velocity = this.transform.up * 2.5f;
+            rb.linearVelocity = this.transform.up * 2.5f;
             popSource.Play();
         }
     }

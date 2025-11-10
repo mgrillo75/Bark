@@ -1,10 +1,10 @@
-﻿using Bark.Gestures;
-using UnityEngine;
-using System;
-using UnityEngine.UI;
-using System.Collections.Generic;
-using Bark;
+﻿using Bark;
+using Bark.Interaction;
 using Bark.Tools;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class ButtonController : MonoBehaviour
 {
@@ -13,7 +13,7 @@ public class ButtonController : MonoBehaviour
         MENU_FALLING, NOCLIP_BOUNDARY, PIGGYBACKING, BUTTON_PRESSED
     }
 
-    private Dictionary<Blocker, string> blockerText = new Dictionary<Blocker, string>()
+    private readonly Dictionary<Blocker, string> blockerText = new Dictionary<Blocker, string>()
     {
         {Blocker.MENU_FALLING, ""},
         {Blocker.NOCLIP_BOUNDARY, "YOU ARE TOO CLOSE TO A WALL TO ACTIVATE THIS"},
@@ -23,10 +23,11 @@ public class ButtonController : MonoBehaviour
 
     public float buttonPushDistance = 0.03f; // Distance the button travels when pushed
     public Action<ButtonController, bool> OnPressed;
-    private float cooldown = .1f, lastPressed = 0;
+    private readonly float cooldown = .1f;
+    private float lastPressed = 0;
     public Canvas canvas;
     public Text text;
-    private List<Blocker> blockers = new List<Blocker>();
+    private readonly List<Blocker> blockers = new List<Blocker>();
     private Transform buttonModel;
     private Material material;
     private bool _isPressed;
@@ -65,7 +66,7 @@ public class ButtonController : MonoBehaviour
             observer.OnTriggerEntered += Press;
             observer.OnTriggerExited += Unpress;
             this.text = GetComponentInChildren<Text>();
-            if(text)
+            if (text)
                 this.text.fontSize = 26;
         }
         catch (Exception e) { Logging.Exception(e); Logging.Debug("Reached", progress); }
@@ -79,7 +80,7 @@ public class ButtonController : MonoBehaviour
                 Plugin.menuController.helpText.text = blockerText[blockers[0]];
                 return;
             }
-            if (!Interactable || 
+            if (!Interactable ||
                 (collider.gameObject != GestureTracker.Instance.leftPointerInteractor.gameObject &&
                 collider.gameObject != GestureTracker.Instance.rightPointerInteractor.gameObject)
             ) return;

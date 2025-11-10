@@ -1,6 +1,5 @@
 ﻿using Bark.GUI;
 using BepInEx.Configuration;
-using GorillaLocomotion;
 using UnityEngine;
 
 namespace Bark.Modules.Physics
@@ -26,7 +25,7 @@ namespace Bark.Modules.Physics
 
         protected override void ReloadConfiguration()
         {
-            if(enabled)
+            if (enabled)
                 Time.timeScale = TimeScale.Value / 10f;
         }
 

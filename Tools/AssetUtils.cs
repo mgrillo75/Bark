@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using UnityEngine;
 using System.Reflection;
+using UnityEngine;
 
-namespace Bark
+namespace Bark.Tools
 {
     public static class AssetUtils
     {
@@ -17,16 +17,14 @@ namespace Bark
         {
             filePath = FormatPath(filePath);
             var baseAssembly = Assembly.GetCallingAssembly();
-            using (Stream resFilestream = baseAssembly.GetManifestResourceStream(filePath))
+            using Stream resFilestream = baseAssembly.GetManifestResourceStream(filePath);
+            if (resFilestream == null)
             {
-                if (resFilestream == null)
-                {
-                    return null;
-                }
-                byte[] ba = new byte[resFilestream.Length];
-                resFilestream.Read(ba, 0, ba.Length);
-                return ba;
+                return null;
             }
+            byte[] ba = new byte[resFilestream.Length];
+            resFilestream.Read(ba, 0, ba.Length);
+            return ba;
         }
 
         /// <summary>
@@ -44,10 +42,10 @@ namespace Bark
             Texture2D texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
             texture.LoadImage(bytes);
 
-            string name = file.Substring(0, file.LastIndexOf('.'));
+            string name = file[..file.LastIndexOf('.')];
             if (name.LastIndexOf('.') >= 0)
             {
-                name = name.Substring(name.LastIndexOf('.') + 1);
+                name = name[(name.LastIndexOf('.') + 1)..];
             }
             texture.name = name;
 

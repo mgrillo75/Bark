@@ -1,14 +1,14 @@
 ﻿using Bark.Extensions;
-using Bark.Gestures;
 using Bark.GUI;
-using Bark.Modules.Movement;
+using Bark.Interaction;
 using Bark.Patches;
 using Bark.Tools;
-using GorillaLocomotion;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Player = GorillaLocomotion.GTPlayer;
+
 namespace Bark.Modules.Multiplayer
 {
     public class Firefly : MonoBehaviour
@@ -64,7 +64,7 @@ namespace Bark.Modules.Multiplayer
                     //particleRenderer.material.SetColor("_EmissionColor", color);
                     trailRenderer.trailMaterial.color = color;
                     //trailRenderer.trailMaterial.SetColor("_EmissionColor", color);
-                    
+
                     Vector3 targetPos = target.position + Vector3.up * .4f * rig.scaleFactor;
                     fly.transform.LookAt(targetPos);
 
@@ -145,7 +145,7 @@ namespace Bark.Modules.Multiplayer
                 GestureTracker.Instance.rightGrip.OnPressed += OnGrip;
                 GestureTracker.Instance.leftGrip.OnReleased += OnGripReleased;
                 GestureTracker.Instance.rightGrip.OnReleased += OnGripReleased;
-                VRRigCachePatches.OnRigCached += OnRigCached;
+                RigContainerPatches.OnRigCached += OnRigCached;
             }
             catch (Exception e)
             {
@@ -247,7 +247,7 @@ namespace Bark.Modules.Multiplayer
                         s?.Obliterate();
                     fireflies.Clear();
                 }
-                VRRigCachePatches.OnRigCached -= OnRigCached;
+                RigContainerPatches.OnRigCached -= OnRigCached;
 
                 if (GestureTracker.Instance)
                 {
@@ -260,7 +260,7 @@ namespace Bark.Modules.Multiplayer
             catch (Exception e) { Logging.Exception(e); }
         }
 
-        private void OnRigCached(Player player, VRRig rig)
+        private void OnRigCached(NetPlayer player, VRRig rig)
         {
             Firefly target = null;
             foreach (Firefly fly in fireflies)
@@ -279,13 +279,13 @@ namespace Bark.Modules.Multiplayer
         //public static ConfigEntry<int> PunchForce;
         //public static void BindConfigEntries()
         //{
-            //Logging.Debug("Binding", DisplayName, "to config");
-            //PunchForce = Plugin.configFile.Bind(
-            //    section: DisplayName,
-            //    key: "punch force",
-            //    defaultValue: 5,
-            //    description: "How much force will be applied to you when you get punched"
-            //);
+        //Logging.Debug("Binding", DisplayName, "to config");
+        //PunchForce = Plugin.configFile.Bind(
+        //    section: DisplayName,
+        //    key: "punch force",
+        //    defaultValue: 5,
+        //    description: "How much force will be applied to you when you get punched"
+        //);
         //}
 
         public override string GetDisplayName()

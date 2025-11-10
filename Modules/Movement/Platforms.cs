@@ -1,16 +1,16 @@
-﻿using GorillaLocomotion;
-using Bark.Tools;
-using System;
-using UnityEngine;
-using UnityEngine.XR;
-using Bark.Extensions;
-using Bark.Gestures;
+﻿using Bark.Extensions;
 using Bark.GUI;
+using Bark.Interaction;
+using Bark.Modules.Physics;
+using Bark.Networking;
+using Bark.Tools;
 using BepInEx.Configuration;
 using GorillaLocomotion.Climbing;
 using HarmonyLib;
-using Bark.Modules.Physics;
-using Bark.Networking;
+using System;
+using UnityEngine;
+using UnityEngine.XR;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Modules.Movement
 {
@@ -43,7 +43,7 @@ namespace Bark.Modules.Movement
                 rain = cloud.GetComponent<ParticleSystem>();
                 wings = this.transform.Find("doug/wings");
 
-                var handObj = isLeft ? Player.Instance.leftControllerTransform : Player.Instance.rightControllerTransform;
+                var handObj = isLeft ? Player.Instance.LeftHand.controllerTransform : Player.Instance.RightHand.controllerTransform;
                 this.hand = handObj.transform;
 
                 string climberName = isLeft ? "leftClimber" : "rightClimber";
@@ -182,7 +182,7 @@ namespace Bark.Modules.Movement
             main.Activate();
             if (Sticky.Value)
             {
-                Player.Instance.bodyCollider.attachedRigidbody.velocity = Vector3.zero;
+                Player.Instance.SetVelocity(Vector3.zero);
                 other.Deactivate();
             }
         }
@@ -194,8 +194,7 @@ namespace Bark.Modules.Movement
             platform.Deactivate();
             if (Sticky.Value && platform == main)
             {
-                var rb = Player.Instance.bodyCollider.attachedRigidbody;
-                rb.velocity = Player.Instance.bodyVelocityTracker.GetAverageVelocity(true, 0.15f, false);
+                Player.Instance.SetVelocity(Player.Instance.bodyVelocityTracker.GetAverageVelocity(true, 0.15f, false));
             }
         }
 
@@ -205,10 +204,9 @@ namespace Bark.Modules.Movement
             {
                 Player.Instance.isClimbing = true;
                 Vector3 offset = main.climber.transform.position - main.transform.position;
-                var rb = Player.Instance.bodyCollider.attachedRigidbody;
-                rb.velocity = Vector3.zero;
-                rb.useGravity = false;
-                rb.MovePosition(rb.position - offset);
+                Player.Instance.SetVelocity(Vector3.zero);
+                //rb.useGravity = false;
+                //rb.MovePosition(rb.position - offset);
             }
         }
 

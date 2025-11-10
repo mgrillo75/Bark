@@ -1,9 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using Bark.Extensions;
+using System;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using UnityEngine;
-using Bark.Extensions;
 
 namespace Bark.Tools
 {
@@ -19,7 +18,7 @@ namespace Bark.Tools
             try
             {
                 step = "Locating renderers";
-                Renderer[] renderers = GameObject.FindObjectsOfType<Renderer>();
+                Renderer[] renderers = GameObject.FindObjectsByType<Renderer>(FindObjectsSortMode.None);
                 Logging.Debug("Found", renderers.Length, "renderers");
                 step = "Looping through renderers";
                 List<Texture> knownTextures = new List<Texture>();

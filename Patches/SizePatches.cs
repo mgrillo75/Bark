@@ -1,24 +1,23 @@
-﻿using HarmonyLib;
-using GorillaLocomotion;
-using System;
-using Bark.Tools;
+﻿using Bark.Extensions;
 using Bark.Modules.Physics;
+using Bark.Tools;
+using HarmonyLib;
+using System;
 using UnityEngine;
-using Bark.Extensions;
-using System.Runtime.CompilerServices;
 
 namespace Bark.Patches
 {
     [HarmonyPatch(typeof(SizeManager))]
-    [HarmonyPatch("ControllingChanger", MethodType.Normal)]
+    [HarmonyPatch(nameof(SizeManager.ControllingChanger), MethodType.Normal)]
     public class SizeChangePatch
     {
         private static void Postfix(ref SizeChanger __result, Transform t)
         {
             if (!Plugin.inRoom) return;
+
             try
             {
-            if (Potions.active && t == GorillaTagger.Instance.offlineVRRig.transform)
+                if (Potions.active && t == GorillaTagger.Instance.offlineVRRig.transform)
                 {
                     __result = Potions.sizeChanger;
                 }

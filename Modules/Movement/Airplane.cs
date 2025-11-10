@@ -1,15 +1,16 @@
-﻿using GorillaLocomotion;
-using Bark.Gestures;
-using Bark.GUI;
-using UnityEngine;
+﻿using Bark.GUI;
+using Bark.Interaction;
 using BepInEx.Configuration;
+using GorillaLocomotion;
+using UnityEngine;
 
 namespace Bark.Modules.Movement
 {
     public class Airplane : BarkModule
     {
         public static readonly string DisplayName = "Airplane";
-        float speedScale = 10f, acceleration = .1f;
+        private float speedScale = 10f;
+        private readonly float acceleration = .1f;
 
         void OnGlide(Vector3 direction)
         {
@@ -21,15 +22,15 @@ namespace Bark.Modules.Movement
                 tracker.leftGrip.pressed ||
                 tracker.rightGrip.pressed) return;
 
-            var player = Player.Instance;
-            if (player.wasLeftHandTouching || player.wasRightHandTouching) return;
+            var player = GTPlayer.Instance;
+            if (player.LeftHand.wasColliding || player.RightHand.wasColliding) return;
 
             if (SteerWith.Value == "head")
                 direction = player.headCollider.transform.forward;
 
-            var rigidbody = player.bodyCollider.attachedRigidbody;
+            var rigidbody = player.playerRigidBody;
             Vector3 velocity = direction * player.scale * speedScale;
-            rigidbody.velocity = Vector3.Lerp(rigidbody.velocity, velocity, acceleration);
+            rigidbody.linearVelocity = Vector3.Lerp(rigidbody.linearVelocity, velocity, acceleration);
         }
 
         protected override void OnEnable()

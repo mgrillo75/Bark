@@ -1,6 +1,6 @@
 ﻿using BepInEx.Configuration;
-using UnityEngine;
 using System;
+using UnityEngine;
 
 namespace Bark.Extensions
 {

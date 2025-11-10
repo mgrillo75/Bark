@@ -1,14 +1,14 @@
 ﻿using Bark.Extensions;
-using Bark.Gestures;
 using Bark.GUI;
+using Bark.Interaction;
 using Bark.Networking;
 using Bark.Tools;
 using BepInEx.Configuration;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using NetworkPlayer = Photon.Realtime.Player;
-using Player = GorillaLocomotion.Player;
+using NetworkPlayer = NetPlayer;
+using Player = GorillaLocomotion.GTPlayer;
 namespace Bark.Modules.Multiplayer
 {
     public class BoxingGlove : MonoBehaviour
@@ -17,7 +17,7 @@ namespace Bark.Modules.Multiplayer
         public AudioSource punchSound;
         public GorillaVelocityEstimator velocity;
         public static int uuid;
-        
+
         void Start()
         {
             punchSound = GetComponent<AudioSource>();
@@ -30,8 +30,8 @@ namespace Bark.Modules.Multiplayer
         public static readonly string DisplayName = "Boxing";
         public float forceMultiplier = 50;
         private Collider punchCollider;
-        private List<BoxingGlove> gloves = new List<BoxingGlove>();
-        private List<VRRig> glovedRigs = new List<VRRig>();
+        private readonly List<BoxingGlove> gloves = new List<BoxingGlove>();
+        private readonly List<VRRig> glovedRigs = new List<VRRig>();
 
         private float lastPunch;
 
@@ -94,7 +94,7 @@ namespace Bark.Modules.Multiplayer
 
             foreach (BoxingGlove g in gloves)
             {
-                if (g && g?.rig?.PhotonView()?.Owner == player)
+                if (g && g?.rig?.rigContainer?.Creator == player)
                 {
                     g?.gameObject.Obliterate();
                     Logging.Debug($"Destroyed {player.NickName}'s gloves.");
@@ -103,7 +103,7 @@ namespace Bark.Modules.Multiplayer
             gloves.RemoveAll(g => g is null);
         }
 
-        Queue<NetworkPlayer> gloveQueue = new Queue<NetworkPlayer>();
+        readonly Queue<NetworkPlayer> gloveQueue = new Queue<NetworkPlayer>();
         void OnPlayerJoined(NetworkPlayer player)
         {
             Logging.Debug(player.NickName, "joined. Giving them gloves.");
@@ -120,8 +120,8 @@ namespace Bark.Modules.Multiplayer
                 Logging.Debug($"Giving gloves to {player.NickName}");
                 foreach (var rig in GorillaParent.instance.vrrigs)
                 {
-                    Logging.Debug($"    {rig?.PhotonView()?.Owner?.NickName} == {player?.NickName}: {rig?.PhotonView()?.Owner?.UserId == player.UserId}");
-                    if (rig?.PhotonView() && rig.PhotonView().Owner == player)
+                    Logging.Debug($"    {rig?.rigContainer?.Creator?.NickName} == {player?.NickName}: {rig?.rigContainer?.Creator?.UserId == player.UserId}");
+                    if (rig?.rigContainer?.Creator == player)
                     {
                         GiveGlovesTo(rig);
                     }
@@ -136,7 +136,7 @@ namespace Bark.Modules.Multiplayer
             {
                 try
                 {
-                    if (rig.PhotonView().Owner.IsLocal || glovedRigs.Contains(rig)) continue;
+                    if (rig.isOfflineVRRig || rig.isLocal || glovedRigs.Contains(rig)) continue;
                     GiveGlovesTo(rig);
                 }
                 catch (Exception e)
@@ -156,7 +156,7 @@ namespace Bark.Modules.Multiplayer
             var righty = CreateGlove(rig.rightHandTransform, false);
             righty.rig = rig;
             gloves.Add(righty);
-            Logging.Debug("Gave gloves to", rig.PhotonView().Owner.NickName);
+            Logging.Debug("Gave gloves to", rig.rigContainer?.Creator?.NickName);
 
         }
 
@@ -186,7 +186,7 @@ namespace Bark.Modules.Multiplayer
             if (force.magnitude < .5f * Player.Instance.scale) return;
             force.Normalize();
             force *= forceMultiplier;
-            Player.Instance.bodyCollider.attachedRigidbody.velocity += force;
+            Player.Instance.playerRigidBody.linearVelocity += force;
             lastPunch = Time.time;
             GestureTracker.Instance.HapticPulse(false);
             GestureTracker.Instance.HapticPulse(true);

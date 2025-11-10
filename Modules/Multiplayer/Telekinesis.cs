@@ -1,11 +1,11 @@
 ﻿using Bark.Extensions;
-using Bark.Gestures;
 using Bark.GUI;
+using Bark.Interaction;
 using Bark.Tools;
-using GorillaLocomotion;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Modules.Multiplayer
 {
@@ -13,7 +13,7 @@ namespace Bark.Modules.Multiplayer
     {
         public static readonly string DisplayName = "Telekinesis";
         public static Telekinesis Instance;
-        private List<TKMarker> markers = new List<TKMarker>();
+        private readonly List<TKMarker> markers = new List<TKMarker>();
         public SphereCollider tkCollider;
         ParticleSystem playerParticles, sithlordHandParticles;
         AudioSource sfx;
@@ -55,7 +55,7 @@ namespace Bark.Modules.Multiplayer
                 Logging.Exception(e);
             }
         }
-        Joint joint;
+        readonly Joint joint;
         void FixedUpdate()
         {
             if (Time.frameCount % 300 == 0)
@@ -74,7 +74,7 @@ namespace Bark.Modules.Multiplayer
                     sithlordHandParticles.Clear();
                     playerParticles.Stop();
                     playerParticles.Clear();
-                    rb.velocity = Player.Instance.bodyVelocityTracker.GetAverageVelocity(true, 0.15f, false) * 2;
+                    rb.linearVelocity = Player.Instance.bodyVelocityTracker.GetAverageVelocity(true, 0.15f, false) * 2;
                     return;
                 }
 
@@ -84,7 +84,7 @@ namespace Bark.Modules.Multiplayer
                 float dampingThreshold = direction.magnitude * 10;
                 //if (rb.velocity.magnitude > dampingThreshold)
                 //if(direction.magnitude < 1)
-                rb.velocity = Vector3.Lerp(rb.velocity, Vector3.zero, .1f);
+                rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, Vector3.zero, .1f);
             }
 
         }
@@ -120,7 +120,7 @@ namespace Bark.Modules.Multiplayer
             {
                 try
                 {
-                    if (rig.PhotonView().Owner.IsLocal ||
+                    if (rig.isOfflineVRRig || rig.isLocal ||
                         rig.gameObject.GetComponent<TKMarker>()) continue;
 
                     markers.Add(rig.gameObject.AddComponent<TKMarker>());

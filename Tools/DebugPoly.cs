@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Bark.Tools
 {
@@ -54,7 +51,7 @@ namespace Bark.Tools
             }
             catch (Exception e) { Logging.Exception(e); }
         }
-        
+
 
         public void SetColor(float h, float s, float v, float a = .1f)
         {

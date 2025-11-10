@@ -1,5 +1,4 @@
 ﻿using Bark.GUI;
-using GorillaNetworking;
 
 namespace Bark.Modules.Misc
 {
@@ -12,7 +11,7 @@ namespace Bark.Modules.Misc
         {
             if (!MenuController.Instance.Built) return;
             base.OnEnable();
-            Plugin.Instance.JoinLobby("BARK_MOD", "MODDED_MODDED_CASUALCASUAL");
+            //Plugin.Instance.JoinLobby("BARK_MOD", "MODDED_MODDED_CASUALCASUAL");
             this.enabled = false;
         }
         public override string GetDisplayName()
@@ -25,6 +24,6 @@ namespace Bark.Modules.Misc
             return "Joins the official Bark Mod code";
         }
 
-        protected override void Cleanup() { }   
+        protected override void Cleanup() { }
     }
 }

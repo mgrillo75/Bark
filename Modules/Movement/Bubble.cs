@@ -1,13 +1,13 @@
-﻿using GorillaLocomotion;
+﻿using Bark.Extensions;
+using Bark.GUI;
+using Bark.Interaction;
+using Bark.Networking;
 using Bark.Tools;
+using BepInEx.Configuration;
+using GorillaLocomotion;
 using System;
 using UnityEngine;
-using Bark.Extensions;
-using Bark.Gestures;
-using Bark.GUI;
-using BepInEx.Configuration;
-using Bark.Networking;
-using NetworkPlayer = Photon.Realtime.Player;
+using NetworkPlayer = NetPlayer;
 
 namespace Bark.Modules.Movement
 {
@@ -44,10 +44,10 @@ namespace Bark.Modules.Movement
                 bubblePrefab = Plugin.assetBundle.LoadAsset<GameObject>("Bubble");
             }
             NetworkPropertyHandler.Instance.OnPlayerModStatusChanged += OnPlayerModStatusChanged;
-            Patches.VRRigCachePatches.OnRigCached += OnRigCached;
+            Patches.RigContainerPatches.OnRigCached += OnRigCached;
         }
 
-        private void OnRigCached(Player player, VRRig rig)
+        private void OnRigCached(NetPlayer player, VRRig rig)
         {
             rig?.gameObject?.GetComponent<BubbleMarker>()?.Obliterate();
         }
@@ -64,19 +64,18 @@ namespace Bark.Modules.Movement
         Rigidbody rb;
         void FixedUpdate()
         {
-            if (!rb)
-                rb = Player.Instance.bodyCollider.attachedRigidbody;
-            rb.AddForce(-UnityEngine.Physics.gravity * rb.mass * Player.Instance.scale);
-            bubble.transform.localScale = Vector3.one * Player.Instance.scale * .75f;
+            if (!rb) rb = GTPlayer.Instance.playerRigidBody;
+            rb.AddForce(-UnityEngine.Physics.gravity * rb.mass * GTPlayer.Instance.scale);
+            bubble.transform.localScale = Vector3.one * GTPlayer.Instance.scale * .75f;
         }
 
         bool leftWasTouching, rightWasTouching;
         float lastTouchLeft, lastTouchRight;
-        float cooldown = .1f;
+        readonly float cooldown = .1f;
         void LateUpdate()
         {
-            bubble.transform.position = Player.Instance.headCollider.transform.position;
-            bubble.transform.position -= bubbleOffset * Player.Instance.scale;
+            bubble.transform.position = GTPlayer.Instance.headCollider.transform.position;
+            bubble.transform.position -= bubbleOffset * GTPlayer.Instance.scale;
 
             Vector3 leftPos = GestureTracker.Instance.leftHand.transform.position,
                 rightPos = GestureTracker.Instance.rightHand.transform.position;
@@ -110,13 +109,13 @@ namespace Bark.Modules.Movement
             }
         }
 
-        float margin = .1f;
+        readonly float margin = .1f;
         float colliderScale = 1;
         bool Touching(Vector3 position)
         {
-            float radius = Player.Instance.scale * colliderScale;
+            float radius = GTPlayer.Instance.scale * colliderScale;
             float d = Vector3.Distance(position, bubble.transform.position);
-            float m = margin * Player.Instance.scale;
+            float m = margin * GTPlayer.Instance.scale;
             return d > radius - m && d < radius + m;
         }
 
@@ -125,7 +124,7 @@ namespace Bark.Modules.Movement
             Sounds.Play(110);
             position -= bubble.transform.position;
             GestureTracker.Instance.HapticPulse(left);
-            Player.Instance.AddForce(position.normalized * Player.Instance.scale * BubbleSpeed.Value / 5);
+            GTPlayer.Instance.AddForce(position.normalized * GTPlayer.Instance.scale * BubbleSpeed.Value / 5);
         }
 
 
@@ -140,20 +139,18 @@ namespace Bark.Modules.Movement
                 bubble = Instantiate(bubblePrefab);
                 bubble.AddComponent<GorillaSurfaceOverride>().overrideIndex = 110;
                 bubble.GetComponent<Collider>().enabled = false;
-                rb = Player.Instance.bodyCollider.attachedRigidbody;
-                baseDrag = rb.drag;
-                rb.drag = 1;
+                rb = GTPlayer.Instance.bodyCollider.attachedRigidbody;
+                baseDrag = rb.linearDamping;
+                rb.linearDamping = 1;
             }
             catch (Exception e) { Logging.Exception(e); }
         }
 
         protected override void Cleanup()
         {
-            if (bubble)
-                Sounds.Play(84, 2);
+            if (bubble) Sounds.Play(84, 2);
             bubble?.Obliterate();
-            if (rb)
-                rb.drag = baseDrag;
+            if (rb) rb.linearDamping = baseDrag;
         }
         protected override void ReloadConfiguration()
         {

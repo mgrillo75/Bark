@@ -1,10 +1,7 @@
-﻿using GorillaLocomotion;
-using Bark.Tools;
-using UnityEngine;
-using System.Reflection;
+﻿using Bark.GUI;
 using Bark.Modules.Physics;
-using Bark.GUI;
-using BepInEx.Configuration;
+using UnityEngine;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Modules.Movement
 {
@@ -27,11 +24,13 @@ namespace Bark.Modules.Movement
         protected void FixedUpdate()
         {
             Player player = Player.Instance;
-            if (player.wasLeftHandTouching || player.wasRightHandTouching)
+            if (player.LeftHand.wasColliding || player.RightHand.wasColliding)
             {
+                /*
                 FieldInfo fieldInfo = typeof(Player).GetField("lastHitInfoHand", BindingFlags.NonPublic | BindingFlags.Instance);
                 hit = (RaycastHit)fieldInfo.GetValue(player);
                 UnityEngine.Physics.gravity = hit.normal * -baseGravity.magnitude * GravScale();
+                */
             }
             else
             {

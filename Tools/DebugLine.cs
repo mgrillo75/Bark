@@ -16,7 +16,7 @@ namespace Bark.Tools
 
         public void Connect(Transform a, Transform b)
         {
-            if(a == null || b == null)
+            if (a == null || b == null)
                 throw new NullReferenceException($"Transform(s) null: {a?.name}, {b?.name}");
             this.a = a;
             this.b = b;

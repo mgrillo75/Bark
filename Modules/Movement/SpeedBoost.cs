@@ -1,10 +1,10 @@
 ﻿using Bark.GUI;
 using Bark.Tools;
 using BepInEx.Configuration;
-using GorillaLocomotion;
 using System;
+using Player = GorillaLocomotion.GTPlayer;
 
-namespace Bark.Modules
+namespace Bark.Modules.Movement
 {
     public class SpeedBoost : BarkModule
     {
@@ -18,7 +18,7 @@ namespace Bark.Modules
             try
             {
                 progress = "Getting Gamemode\n";
-                var gameMode = GorillaGameManager.instance?.GameMode();
+                var gameMode = GorillaGameManager.instance?.GameModeName();
                 progress = "Checking status\n";
                 if (active && (gameMode is null || gameMode == "NONE" || gameMode == "CASUAL"))
                 {
@@ -30,7 +30,7 @@ namespace Bark.Modules
             catch (Exception e)
             {
                 Logging.Debug("GorillaGameManager.instance is null:", GorillaGameManager.instance is null);
-                Logging.Debug("GorillaGameManager.instance.GameMode() is null:", GorillaGameManager.instance?.GameMode() is null);
+                Logging.Debug("GorillaGameManager.instance.GameModeName() is null:", GorillaGameManager.instance?.GameModeName() is null);
                 Logging.Debug(progress);
                 Logging.Exception(e);
             }
@@ -56,8 +56,8 @@ namespace Bark.Modules
         }
         protected override void ReloadConfiguration()
         {
-            scale = 1 + (Speed.Value / 10f);
-            if(this.enabled)
+            scale = 1 + Speed.Value / 10f;
+            if (enabled)
                 Player.Instance.velocityLimit = baseVelocityLimit * scale;
         }
 

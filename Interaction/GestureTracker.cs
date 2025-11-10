@@ -1,16 +1,16 @@
 ﻿using Bark.Extensions;
 using Bark.Tools;
-using GorillaLocomotion;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using Valve.VR;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
+using Valve.VR;
+using Player = GorillaLocomotion.GTPlayer;
 
-namespace Bark.Gestures
+namespace Bark.Interaction
 {
     public class GestureTracker : MonoBehaviour
     {
@@ -43,19 +43,15 @@ namespace Bark.Gestures
 
         public Transform leftPointerTransform, rightPointerTransform, leftThumbTransform, rightThumbTransform;
 
-        public const string localRigPath =
-            "Player Objects/Local VRRig/Local Gorilla Player";
-        public const string palmPath =
-            "/rig/body/shoulder.{0}/upper_arm.{0}/forearm.{0}/hand.{0}/palm.01.{0}";
-        public const string pointerFingerPath =
-            palmPath + "/f_index.01.{0}/f_index.02.{0}/f_index.03.{0}";
-        public const string thumbPath =
-            palmPath + "/thumb.01.{0}/thumb.02.{0}/thumb.03.{0}";
+        public const string palmPath = "GorillaPlayerNetworkedRigAnchor/rig/body/shoulder.{0}/upper_arm.{0}/forearm.{0}/hand.{0}/palm.01.{0}";
 
+        public const string pointerFingerPath = palmPath + "/f_index.01.{0}/f_index.02.{0}/f_index.03.{0}";
+
+        public const string thumbPath = palmPath + "/thumb.01.{0}/thumb.02.{0}/thumb.03.{0}";
 
         // Gesture Actions
         public Action OnMeatBeat;
-        private Queue<int> meatBeatCollisions = new Queue<int>();
+        private readonly Queue<int> meatBeatCollisions = new Queue<int>();
         private float lastBeat;
 
         public Action<Vector3> OnGlide;
@@ -158,7 +154,7 @@ namespace Bark.Gestures
             };
         }
 
-        float illProximityThreshold = .1f;
+        readonly float illProximityThreshold = .1f;
         bool TrackIlluminatiGesture()
         {
             var scale = Player.Instance.scale;
@@ -265,27 +261,27 @@ namespace Bark.Gestures
                 radius = 1 / 4f;
             chest.transform.localScale = new Vector3(radius, height, radius);
 
-            var leftPalm = GameObject.Find(string.Format(localRigPath + palmPath, "L")).transform;
+
+            var leftPalm = GorillaTagger.Instance.offlineVRRig.transform.Find(string.Format(palmPath, "L"));
             leftPalmInteractor = CreateInteractor("Left Palm Interactor", leftPalm, 1 / 16f);
             leftHand = leftPalmInteractor.gameObject;
             leftHand.transform.localRotation = Quaternion.Euler(-90, -90, 0);
 
-            var rightPalm = GameObject.Find(string.Format(localRigPath + palmPath, "R")).transform;
+            var rightPalm = GorillaTagger.Instance.offlineVRRig.transform.Find(string.Format(palmPath, "R"));
             rightPalmInteractor = CreateInteractor("Right Palm Interactor", rightPalm, 1 / 16f);
             rightHand = rightPalmInteractor.gameObject;
             rightHand.transform.localRotation = Quaternion.Euler(-90, 0, 0);
 
-
-            leftPointerTransform = GameObject.Find(string.Format(localRigPath + pointerFingerPath, "L")).transform;
+            leftPointerTransform = GorillaTagger.Instance.offlineVRRig.transform.Find(string.Format(pointerFingerPath, "L"));
             leftPointerInteractor = CreateInteractor("Left Pointer Interactor", leftPointerTransform, 1 / 32f);
             leftPointerObj = leftPointerInteractor.gameObject;
 
-            rightPointerTransform = GameObject.Find(string.Format(localRigPath + pointerFingerPath, "R")).transform;
+            rightPointerTransform = GorillaTagger.Instance.offlineVRRig.transform.Find(string.Format(pointerFingerPath, "R"));
             rightPointerInteractor = CreateInteractor("Right Pointer Interactor", rightPointerTransform, 1 / 32f);
             rightPointerObj = rightPointerInteractor.gameObject;
 
-            leftThumbTransform = GameObject.Find(string.Format(localRigPath + thumbPath, "L")).transform;
-            rightThumbTransform = GameObject.Find(string.Format(localRigPath + thumbPath, "R")).transform;
+            leftThumbTransform = GorillaTagger.Instance.offlineVRRig.transform.Find(string.Format(thumbPath, "L"));
+            rightThumbTransform = GorillaTagger.Instance.offlineVRRig.transform.Find(string.Format(thumbPath, "R"));
         }
 
         public BarkInteractor CreateInteractor(string name, Transform parent, float scale)
@@ -296,9 +292,11 @@ namespace Bark.Gestures
             obj.transform.localScale = Vector3.one * scale;
             return interactor;
         }
+
+        [Obsolete]
         public XRController GetController(bool isLeft)
         {
-            foreach (var controller in FindObjectsOfType<XRController>())
+            foreach (var controller in FindObjectsByType<XRController>(FindObjectsSortMode.None))
             {
                 if (isLeft && controller.name.ToLowerInvariant().Contains("left"))
                 {
@@ -329,35 +327,21 @@ namespace Bark.Gestures
             hand.SendHapticImpulse(0u, strength, duration);
         }
 
-        public InputTracker GetInputTracker(string name, XRNode node)
+        public InputTracker GetInputTracker(string name, XRNode node) => name switch
         {
-            switch (name)
-            {
-                case "grip":
-                    return node == XRNode.LeftHand ? leftGrip : rightGrip;
-                case "trigger":
-                    return node == XRNode.LeftHand ? leftTrigger : rightTrigger;
-                case "stick":
-                    return node == XRNode.LeftHand ? leftStick : rightStick;
-                case "primary":
-                    return node == XRNode.LeftHand ? leftPrimary : rightPrimary;
-                case "secondary":
-                    return node == XRNode.LeftHand ? leftSecondary : rightSecondary;
-                case "a/x":
-                    return node == XRNode.LeftHand ? leftPrimary : rightPrimary;
-                case "b/y":
-                    return node == XRNode.LeftHand ? leftSecondary : rightSecondary;
-                case "a":
-                    return rightPrimary;
-                case "b":
-                    return rightSecondary;
-                case "x":
-                    return leftPrimary;
-                case "y":
-                    return leftSecondary;
-            }
-            return null;
-        }
+            "grip" => node == XRNode.LeftHand ? leftGrip : rightGrip,
+            "trigger" => node == XRNode.LeftHand ? leftTrigger : rightTrigger,
+            "stick" => node == XRNode.LeftHand ? leftStick : rightStick,
+            "primary" => node == XRNode.LeftHand ? leftPrimary : rightPrimary,
+            "secondary" => node == XRNode.LeftHand ? leftSecondary : rightSecondary,
+            "a/x" => node == XRNode.LeftHand ? leftPrimary : rightPrimary,
+            "b/y" => node == XRNode.LeftHand ? leftSecondary : rightSecondary,
+            "a" => rightPrimary,
+            "b" => rightSecondary,
+            "x" => leftPrimary,
+            "y" => leftSecondary,
+            _ => null,
+        };
     }
 
     public abstract class InputTracker
@@ -405,7 +389,6 @@ namespace Bark.Gestures
         public bool rightControllerStickButton, leftControllerStickButton;
         public Vector2 rightControllerStickAxis, leftControllerStickAxis;
         public static ControllerInputPollerExt Instance;
-        bool steam;
 
         public ControllerInputPollerExt()
         {

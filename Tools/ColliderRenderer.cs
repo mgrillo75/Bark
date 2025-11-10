@@ -7,7 +7,7 @@ public class ColliderRenderer : MonoBehaviour
 {
     private Dictionary<Transform, BoxCollider> boxColliders;
     private Dictionary<Transform, SphereCollider> sphereColliders;
-    private Dictionary<Transform, MeshCollider> meshColliders;
+    private readonly Dictionary<Transform, MeshCollider> meshColliders;
     public float refreshRate = 10;
     Transform obj;
     int refreshOffset;

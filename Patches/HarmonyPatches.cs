@@ -1,8 +1,7 @@
 ﻿using HarmonyLib;
-using System;
 using System.Reflection;
 
-namespace Bark
+namespace Bark.Patches
 {
     /// <summary>
     /// This class handles applying harmony patches to the game.
@@ -19,10 +18,7 @@ namespace Bark
         {
             if (!IsPatched)
             {
-                if (instance == null)
-                {
-                    instance = new Harmony(InstanceId);
-                }
+                instance ??= new Harmony(InstanceId);
 
                 instance.PatchAll(Assembly.GetExecutingAssembly());
                 IsPatched = true;

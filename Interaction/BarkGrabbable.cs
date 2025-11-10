@@ -1,7 +1,5 @@
-﻿using Bark.Gestures;
-using GorillaLocomotion;
-using UnityEngine;
-
+﻿using UnityEngine;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Interaction
 {
@@ -47,7 +45,7 @@ namespace Bark.Interaction
                 rb.isKinematic = true;
             }
             this.transform.SetParent(interactor.transform);
-            if(interactor.IsLeft)
+            if (interactor.IsLeft)
                 this.transform.localPosition = this.LocalPosition;
             else
                 this.transform.localPosition = this.MirroredLocalPosition;
@@ -66,8 +64,8 @@ namespace Bark.Interaction
                     rb.useGravity = true;
 
                     // Apply the force to the rigidbody
-                    rb.velocity = (Player.Instance.currentVelocity) + velEstimator.linearVelocity * throwForceMultiplier;
-                    rb.velocity *= 1 / Player.Instance.scale;
+                    rb.linearVelocity = Player.Instance.currentVelocity + velEstimator.linearVelocity * throwForceMultiplier;
+                    rb.linearVelocity *= 1 / Player.Instance.scale;
                     rb.angularVelocity = velEstimator.angularVelocity;
                 }
                 else

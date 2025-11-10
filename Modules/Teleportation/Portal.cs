@@ -1,13 +1,13 @@
-﻿using GorillaLocomotion;
+﻿using Bark.Extensions;
+using Bark.GUI;
+using Bark.Interaction;
+using Bark.Patches;
 using Bark.Tools;
+using BepInEx.Configuration;
 using System;
 using UnityEngine;
-using Bark.Extensions;
-using Bark.Gestures;
-using Bark.GUI;
-using BepInEx.Configuration;
 using UnityEngine.XR;
-using Bark.Patches;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Modules.Teleportation
 {
@@ -114,7 +114,7 @@ namespace Bark.Modules.Teleportation
 
         }
 
-        Color[] portalColors = new Color[]
+        readonly Color[] portalColors = new Color[]
         {
             Color.red, Color.blue
         };
@@ -165,7 +165,7 @@ namespace Bark.Modules.Teleportation
             Renderer outPortalRenderer = inPortal.GetComponent<Renderer>();
             outPortalRenderer.materials[0] = Instantiate(passthroughMaterialPrefab);
             inPortalRenderer.materials[0] = Instantiate(passthroughMaterialPrefab);
-            
+
             inPortalRenderer.materials[0].mainTexture = portalRenderTextures[index];
             outPortalRenderer.materials[0].mainTexture = portalRenderTextures[(index + 1) % 2];
 

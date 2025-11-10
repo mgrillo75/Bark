@@ -1,13 +1,12 @@
-﻿using System;
-using UnityEngine;
-using Bark.Gestures;
+﻿using Bark.Extensions;
 using Bark.GUI;
-using Bark.Tools;
-using Bark.Extensions;
-using GorillaLocomotion;
-using BepInEx.Configuration;
 using Bark.Interaction;
 using Bark.Patches;
+using Bark.Tools;
+using BepInEx.Configuration;
+using System;
+using UnityEngine;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Modules.Teleportation
 {
@@ -40,7 +39,7 @@ namespace Bark.Modules.Teleportation
         {
             try
             {
-                pearl = SetupPearl(Instantiate(pearlPrefab), false);
+                pearl = SetupPearl(Instantiate(pearlPrefab));
                 ReloadConfiguration();
             }
             catch (Exception e)
@@ -49,7 +48,7 @@ namespace Bark.Modules.Teleportation
             }
         }
 
-        ThrowablePearl SetupPearl(GameObject pearlObj, bool isLeft)
+        ThrowablePearl SetupPearl(GameObject pearlObj)
         {
             try
             {
@@ -114,7 +113,7 @@ namespace Bark.Modules.Teleportation
         Rigidbody rigidbody;
         AudioSource audioSource;
         LayerMask mask;
-        bool thrown = false,landed = true;
+        bool thrown = false;
         Material monkeMat, trailMat;
         VRRig playerRig;
         ParticleSystem trail;
@@ -175,16 +174,14 @@ namespace Bark.Modules.Teleportation
         {
             if (!thrown) return;
             ray.origin = this.transform.position;
-            ray.direction = this.rigidbody.velocity;
-            RaycastHit hit;
-            UnityEngine.Physics.Raycast(ray, out hit, ray.direction.magnitude, mask);
+            ray.direction = this.rigidbody.linearVelocity;
+            UnityEngine.Physics.Raycast(ray, out RaycastHit hit, ray.direction.magnitude, mask);
 
             if (hit.collider != null)
             {
                 TeleportPatch.TeleportPlayer(hit.point + hit.normal * Player.Instance.scale / 2f);
                 audioSource.Play();
                 thrown = false;
-                landed = true;
                 trail.Stop();
                 this.transform.position = Vector3.down * 1000;
             }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Bark.Extensions
 {
@@ -32,7 +33,8 @@ namespace Bark.Extensions
         }
 
 
-        private static System.Random rng = new System.Random();
+        private static readonly Random rng = new Random();
+
         public static void Shuffle<T>(this IList<T> list)
         {
             int n = list.Count;
@@ -40,9 +42,7 @@ namespace Bark.Extensions
             {
                 n--;
                 int k = rng.Next(n + 1);
-                T value = list[k];
-                list[k] = list[n];
-                list[n] = value;
+                (list[n], list[k]) = (list[k], list[n]);
             }
         }
     }

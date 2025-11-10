@@ -1,7 +1,7 @@
 ﻿using Bark.GUI;
-using GorillaLocomotion;
 using UnityEngine;
 using UnityEngine.XR;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Modules.Movement
 {
@@ -24,14 +24,14 @@ namespace Bark.Modules.Movement
         void FixedUpdate()
         {
             InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(CommonUsages.primaryButton, out primaryPressed);
-            if (_player.wasRightHandTouching || _player.wasLeftHandTouching)
+            if (_player.LeftHand.wasColliding || _player.RightHand.wasColliding)
             {
                 canDoubleJump = true;
             }
-            if (canDoubleJump && primaryPressed && !(_player.wasRightHandTouching || _player.wasLeftHandTouching))
+            if (canDoubleJump && primaryPressed && !(_player.LeftHand.wasColliding || _player.RightHand.wasColliding))
             {
                 direction = _player.headCollider.transform.forward;
-                _rigidbody.velocity = new Vector3(direction.x, direction.y, direction.z) * _player.maxJumpSpeed * _player.scale;
+                _rigidbody.linearVelocity = new Vector3(direction.x, direction.y, direction.z) * _player.maxJumpSpeed * _player.scale;
                 canDoubleJump = false;
             }
 

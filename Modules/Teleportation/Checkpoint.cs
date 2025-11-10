@@ -1,16 +1,16 @@
-﻿using GorillaLocomotion;
-using Bark.Extensions;
-using Bark.Gestures;
+﻿using Bark.Extensions;
 using Bark.GUI;
+using Bark.Interaction;
+using Bark.Modules.Physics;
 using Bark.Patches;
 using Bark.Tools;
-using Bark.Modules.Physics;
+using BepInEx.Configuration;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
-using BepInEx.Configuration;
+using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Modules.Teleportation
 {
@@ -63,7 +63,7 @@ namespace Bark.Modules.Teleportation
 
                 float chargeScale = MathExtensions.Map(ChargeTime.Value, 0, 10, 0f, 1f);
                 float scale = Mathf.Lerp(0, Player.Instance.scale, (Time.time - startTime) / chargeScale);
-                checkpointMarker.position = Player.Instance.leftControllerTransform.position + Vector3.up * .15f * Player.Instance.scale;
+                checkpointMarker.position = Player.Instance.LeftHand.controllerTransform.position + Vector3.up * .15f * Player.Instance.scale;
                 checkpointMarker.localScale = Vector3.one * scale;
                 if (Mathf.Abs(scale - Player.Instance.scale) < .01f)
                 {
@@ -98,7 +98,7 @@ namespace Bark.Modules.Teleportation
             Vector3 startPos, endPos;
             while (GestureTracker.Instance.rightTrigger.pressed && pointSet)
             {
-                startPos = Player.Instance.rightControllerTransform.position;
+                startPos = Player.Instance.RightHand.controllerTransform.position;
                 bananaLine.SetPosition(1, startPos);
                 float chargeScale = MathExtensions.Map(ChargeTime.Value, 0, 10, 0f, 1f);
                 endPos = Vector3.Lerp(startPos, checkpointMarker.transform.position, (Time.time - startTime) / chargeScale);
@@ -167,7 +167,7 @@ namespace Bark.Modules.Teleportation
             if (!MenuController.Instance.Built) return;
             bananaLine?.gameObject.Obliterate();
             checkpointMarker?.gameObject.Obliterate();
-            
+
             if (GestureTracker.Instance)
             {
                 GestureTracker.Instance.leftTrigger.OnPressed -= Triggered;
