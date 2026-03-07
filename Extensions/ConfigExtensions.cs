@@ -21,7 +21,7 @@ namespace Bark.Extensions
             {
                 return new ConfigValueInfo
                 {
-                    AcceptableValues = new object[] { false, true },
+                    AcceptableValues = [false, true],
                     InitialValue = (bool)entry.BoxedValue ? 1 : 0
                 };
             }
@@ -29,8 +29,8 @@ namespace Bark.Extensions
             {
                 return new ConfigValueInfo
                 {
-                    AcceptableValues = new object[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
-                    InitialValue = (int)Mathf.Clamp((int)entry.BoxedValue, 0, 10)
+                    AcceptableValues = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                    InitialValue = Mathf.Clamp((int)entry.BoxedValue, 0, 10)
                 };
             }
             else if (settingType == typeof(string))

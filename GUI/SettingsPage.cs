@@ -49,6 +49,7 @@ public class SettingsPage : MonoBehaviour
             valueSlider.OnValueChanged += (value) =>
             {
                 entry.BoxedValue = value;
+                entry.Category.SaveToFile();
             };
 
         }
@@ -82,7 +83,7 @@ public class SettingsPage : MonoBehaviour
             {
                 if (category.Identifier == modName || category.DisplayName == modName)
                 {
-                    return [.. category.Entries.Select(entry => entry.Identifier)];
+                    return [.. category.Entries.Select(entry => entry.DisplayName)];
                 }
             }
 
