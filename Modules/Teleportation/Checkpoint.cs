@@ -4,7 +4,9 @@ using Bark.Interaction;
 using Bark.Modules.Physics;
 using Bark.Patches;
 using Bark.Tools;
-using BepInEx.Configuration;
+using GorillaLibrary.Models;
+using GorillaLibrary.Utilities;
+using MelonLoader;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -58,7 +60,7 @@ namespace Bark.Modules.Teleportation
         {
             checkpointMarker.gameObject.SetActive(true);
             float startTime = Time.time;
-            while (GestureTracker.Instance.leftTrigger.pressed && !NoCollide.active)
+            while (InputUtility.LeftTrigger.pressed && !NoCollide.active)
             {
 
                 float chargeScale = MathExtensions.Map(ChargeTime.Value, 0, 10, 0f, 1f);
@@ -96,7 +98,7 @@ namespace Bark.Modules.Teleportation
             bananaLine.gameObject.SetActive(true);
             float startTime = Time.time;
             Vector3 startPos, endPos;
-            while (GestureTracker.Instance.rightTrigger.pressed && pointSet)
+            while (InputUtility.RightTrigger.pressed && pointSet)
             {
                 startPos = Player.Instance.RightHand.controllerTransform.position;
                 bananaLine.SetPosition(1, startPos);
@@ -146,8 +148,9 @@ namespace Bark.Modules.Teleportation
                 //    };
                 //    markedTriggers.Add(triggerBox);
                 //}
-                GestureTracker.Instance.leftTrigger.OnPressed += Triggered;
-                GestureTracker.Instance.rightTrigger.OnPressed += Triggered;
+
+                InputUtility.LeftTrigger.OnPressed += Triggered;
+                InputUtility.RightTrigger.OnPressed += Triggered;
             }
             catch (Exception e) { Logging.Exception(e); }
         }
@@ -168,11 +171,9 @@ namespace Bark.Modules.Teleportation
             bananaLine?.gameObject.Obliterate();
             checkpointMarker?.gameObject.Obliterate();
 
-            if (GestureTracker.Instance)
-            {
-                GestureTracker.Instance.leftTrigger.OnPressed -= Triggered;
-                GestureTracker.Instance.rightTrigger.OnPressed -= Triggered;
-            }
+            InputUtility.LeftTrigger.OnPressed -= Triggered;
+            InputUtility.RightTrigger.OnPressed -= Triggered;
+
             if (markedTriggers is null) return;
             foreach (var triggerBox in markedTriggers)
             {
@@ -180,15 +181,14 @@ namespace Bark.Modules.Teleportation
             }
         }
 
-        public static ConfigEntry<int> ChargeTime;
+        public static MelonPreferences_Entry<int> ChargeTime;
+
         public static void BindConfigEntries()
         {
-            ChargeTime = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "charge time",
-                defaultValue: 5,
-                description: "How long it takes to charge the teleport"
-            );
+            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
+            category.SetFilePath(UserDataPath);
+
+            ChargeTime = category.CreateEntry("chargeTime", 5, "Charge Time", "How long it takes to charge the teleport", false, false, null);
         }
 
         public override string GetDisplayName()

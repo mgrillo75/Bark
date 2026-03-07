@@ -1,6 +1,6 @@
 ﻿using Bark.GUI;
 using Bark.Tools;
-using BepInEx.Configuration;
+using MelonLoader;
 using System;
 using Player = GorillaLocomotion.GTPlayer;
 
@@ -61,15 +61,14 @@ namespace Bark.Modules.Movement
                 Player.Instance.velocityLimit = baseVelocityLimit * scale;
         }
 
-        public static ConfigEntry<int> Speed;
+        public static MelonPreferences_Entry<int> Speed;
+
         public static void BindConfigEntries()
         {
-            Speed = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "speed",
-                defaultValue: 5,
-                description: "How fast you run while speed boost is active"
-            );
+            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
+            category.SetFilePath(UserDataPath);
+
+            Speed = category.CreateEntry("speed", 5, "Speed", "How fast you run while speed boost is active", false, false, null);
         }
 
         public override string GetDisplayName()

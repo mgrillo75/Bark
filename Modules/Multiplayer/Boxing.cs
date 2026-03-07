@@ -3,9 +3,11 @@ using Bark.GUI;
 using Bark.Interaction;
 using Bark.Networking;
 using Bark.Tools;
-using BepInEx.Configuration;
+using GorillaLibrary.Utilities;
+using MelonLoader;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using NetworkPlayer = NetPlayer;
 using Player = GorillaLocomotion.GTPlayer;
@@ -94,7 +96,7 @@ namespace Bark.Modules.Multiplayer
 
             foreach (BoxingGlove g in gloves)
             {
-                if (g && g?.rig?.rigContainer?.Creator == player)
+                if (g && g?.rig?.Creator == player)
                 {
                     g?.gameObject.Obliterate();
                     Logging.Debug($"Destroyed {player.NickName}'s gloves.");
@@ -118,10 +120,10 @@ namespace Bark.Modules.Multiplayer
             {
                 NetworkPlayer player = gloveQueue.Dequeue();
                 Logging.Debug($"Giving gloves to {player.NickName}");
-                foreach (var rig in GorillaParent.instance.vrrigs)
+                foreach (var rig in RigUtility.Rigs.Values.Select(rigContainer => rigContainer.Rig))
                 {
-                    Logging.Debug($"    {rig?.rigContainer?.Creator?.NickName} == {player?.NickName}: {rig?.rigContainer?.Creator?.UserId == player.UserId}");
-                    if (rig?.rigContainer?.Creator == player)
+                    Logging.Debug($"    {rig?.Creator?.NickName} == {player?.NickName}: {rig?.Creator?.UserId == player.UserId}");
+                    if (rig?.Creator == player)
                     {
                         GiveGlovesTo(rig);
                     }
@@ -132,7 +134,7 @@ namespace Bark.Modules.Multiplayer
         void CreateGloves()
         {
 
-            foreach (var rig in GorillaParent.instance.vrrigs)
+            foreach (var rig in RigUtility.Rigs.Values.Select(rigContainer => rigContainer.Rig))
             {
                 try
                 {
@@ -156,7 +158,7 @@ namespace Bark.Modules.Multiplayer
             var righty = CreateGlove(rig.rightHandTransform, false);
             righty.rig = rig;
             gloves.Add(righty);
-            Logging.Debug("Gave gloves to", rig.rigContainer?.Creator?.NickName);
+            Logging.Debug("Gave gloves to", rig?.Creator?.NickName);
 
         }
 
@@ -186,7 +188,7 @@ namespace Bark.Modules.Multiplayer
             if (force.magnitude < .5f * Player.Instance.scale) return;
             force.Normalize();
             force *= forceMultiplier;
-            Player.Instance.playerRigidBody.linearVelocity += force;
+            Player.Instance.AddForce(force);
             lastPunch = Time.time;
             GestureTracker.Instance.HapticPulse(false);
             GestureTracker.Instance.HapticPulse(true);
@@ -200,16 +202,15 @@ namespace Bark.Modules.Multiplayer
             forceMultiplier = (PunchForce.Value) * 5;
         }
 
-        public static ConfigEntry<int> PunchForce;
+        public static MelonPreferences_Entry<int> PunchForce;
         public static void BindConfigEntries()
         {
             Logging.Debug("Binding", DisplayName, "to config");
-            PunchForce = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "punch force",
-                defaultValue: 5,
-                description: "How much force will be applied to you when you get punched"
-            );
+
+            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
+            category.SetFilePath(UserDataPath);
+
+            PunchForce = category.CreateEntry("punch force", 5, "Punch Force", "How much force will be applied to you when punched", false, false, null);
         }
 
         public override string GetDisplayName()

@@ -2,6 +2,8 @@
 using Bark.GUI;
 using Bark.Interaction;
 using Bark.Tools;
+using GorillaLibrary.Models;
+using GorillaLibrary.Utilities;
 using GorillaLocomotion.Climbing;
 using System;
 using UnityEngine;
@@ -22,11 +24,12 @@ namespace Bark.Modules.Movement
             base.OnEnable();
             try
             {
-                leftGrip = GestureTracker.Instance.leftGrip;
-                rightGrip = GestureTracker.Instance.rightGrip;
+                leftGrip = InputUtility.LeftGrip;
+                rightGrip = InputUtility.RightGrip;
 
                 leftHand = GestureTracker.Instance.leftHand.transform;
                 rightHand = GestureTracker.Instance.rightHand.transform;
+
                 climbableLeft = CreateClimbable(leftGrip);
                 climbableRight = CreateClimbable(rightGrip);
                 ReloadConfiguration();
@@ -84,7 +87,7 @@ namespace Bark.Modules.Movement
 
         public void OnRelease(InputTracker tracker)
         {
-            if (tracker == GestureTracker.Instance.leftGrip)
+            if (tracker == InputUtility.LeftGrip)
                 climbableLeft.SetActive(false);
             else
                 climbableRight.SetActive(false);

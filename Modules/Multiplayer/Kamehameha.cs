@@ -2,6 +2,7 @@
 using Bark.GUI;
 using Bark.Interaction;
 using Bark.Tools;
+using GorillaLibrary.Utilities;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -69,8 +70,8 @@ namespace Bark.Modules.Multiplayer
                 {
                     float strength = Mathf.SmoothStep(0, 1, diameter / maxOrbSize * scale);
                     GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(Random.Range(40, 48), false, strength / 10f);
-                    GestureTracker.Instance.leftController.SendHapticImpulse(0u, strength, hapticDuration);
-                    GestureTracker.Instance.rightController.SendHapticImpulse(0u, strength, hapticDuration);
+                    InputUtility.LeftController.SendHapticImpulse(0u, strength, hapticDuration);
+                    InputUtility.RightController.SendHapticImpulse(0u, strength, hapticDuration);
                     lastHaptic = Time.time;
                 }
                 diameter = Vector3.Distance(leftHand.position, rightHand.position);
@@ -99,8 +100,8 @@ namespace Bark.Modules.Multiplayer
                 {
                     float strength = 1;
                     GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(Random.Range(40, 56), false, strength / 10f);
-                    GestureTracker.Instance.leftController.SendHapticImpulse(0u, strength, hapticDuration);
-                    GestureTracker.Instance.rightController.SendHapticImpulse(0u, strength, hapticDuration);
+                    InputUtility.LeftController.SendHapticImpulse(0u, strength, hapticDuration);
+                    InputUtility.RightController.SendHapticImpulse(0u, strength, hapticDuration);
                     lastHaptic = Time.time;
                 }
                 float scale = Player.Instance.scale;

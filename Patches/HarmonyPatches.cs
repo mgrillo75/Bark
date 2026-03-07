@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace Bark.Patches
 {
@@ -9,7 +8,7 @@ namespace Bark.Patches
     /// </summary>
     public class HarmonyPatches
     {
-        private static Harmony instance;
+        private static HarmonyLib.Harmony instance;
 
         public static bool IsPatched { get; private set; }
         public const string InstanceId = PluginInfo.GUID;
@@ -18,7 +17,7 @@ namespace Bark.Patches
         {
             if (!IsPatched)
             {
-                instance ??= new Harmony(InstanceId);
+                instance ??= new HarmonyLib.Harmony(InstanceId);
 
                 instance.PatchAll(Assembly.GetExecutingAssembly());
                 IsPatched = true;

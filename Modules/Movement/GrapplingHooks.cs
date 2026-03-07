@@ -3,7 +3,7 @@ using Bark.GUI;
 using Bark.Interaction;
 using Bark.Modules.Teleportation;
 using Bark.Tools;
-using BepInEx.Configuration;
+using MelonLoader;
 using System;
 using UnityEngine;
 using Player = GorillaLocomotion.GTPlayer;
@@ -97,8 +97,8 @@ namespace Bark.Modules.Movement
             Setup();
         }
 
-        public static ConfigEntry<int> Spring, Steering, MaxLength;
-        public static ConfigEntry<string> RopeType;
+        public static MelonPreferences_Entry<int> Spring, Steering, MaxLength;
+        public static MelonPreferences_Entry<string> RopeType;
         protected override void ReloadConfiguration()
         {
             var guns = new BananaGun[] { bananaGunL?.GetComponent<BananaGun>(), bananaGunR?.GetComponent<BananaGun>() };
@@ -120,36 +120,16 @@ namespace Bark.Modules.Movement
 
         public static void BindConfigEntries()
         {
-            RopeType = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "rope type",
-                defaultValue: "elastic",
-                configDescription: new ConfigDescription(
-                    "Whether the rope should pull you to the anchor point or not",
-                    new AcceptableValueList<string>("elastic", "rope")
-                )
-            );
+            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
+            category.SetFilePath(UserDataPath);
 
-            Spring = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "springiness",
-                defaultValue: 5,
-                description: "If ropes are elastic, this is how springy the ropes are"
-            );
+            RopeType = category.CreateEntry("rope type", "elastic", "Rope Type", "Whether the rope should pull you to the anchor point or not", false, false, new ValueList<string>("elastic", "rope"));
 
-            Steering = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "steering",
-                defaultValue: 5,
-                description: "How much influence you have over your velocity"
-            );
+            Spring = category.CreateEntry("springiness", 5, "Springiness", "If ropes are elastic, this is how springy the ropes are", false, false, null);
 
-            MaxLength = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "max length",
-                defaultValue: 5,
-                description: "The maximum distance that the grappling hook can reach"
-            );
+            Steering = category.CreateEntry("steering", 5, "Steering", "How much influence you have over your velocity", false, false, null);
+
+            MaxLength = category.CreateEntry("max length", 5, "Max Length", "The maximum distance that the grappling hook can reach", false, false, null);
         }
 
         public override string GetDisplayName()

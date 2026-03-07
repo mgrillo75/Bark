@@ -76,7 +76,7 @@ namespace Bark.Patches
     }
 
     [HarmonyPatch(typeof(Player))]
-    [HarmonyPatch(nameof(Player.GetSwimmingVelocityForHand), MethodType.Normal)]
+    [HarmonyPatch("GetSwimmingVelocityForHand", MethodType.Normal)]
     internal class SwimmingVelocityPatch
     {
         private static void Postfix(ref Vector3 swimmingVelocityChange)

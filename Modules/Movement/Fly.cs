@@ -1,7 +1,7 @@
 ﻿using Bark.Extensions;
 using Bark.GUI;
-using Bark.Interaction;
-using BepInEx.Configuration;
+using GorillaLibrary.Utilities;
+using MelonLoader;
 using UnityEngine;
 using Player = GorillaLocomotion.GTPlayer;
 
@@ -21,8 +21,8 @@ namespace Bark.Modules.Movement
                 && !BarkModule.enabledModules[Bubble.DisplayName])
                 rb.AddForce(-UnityEngine.Physics.gravity * rb.mass * Player.Instance.scale);
 
-            xz = GestureTracker.Instance.leftStickAxis.GetValue();
-            y = GestureTracker.Instance.rightStickAxis.GetValue().y;
+            xz = InputUtility.LeftStickAxis.GetValue();
+            y = InputUtility.RightStickAxis.GetValue().y;
 
             Vector3 inputDirection = new Vector3(xz.x, y, xz.y);
 
@@ -59,8 +59,8 @@ namespace Bark.Modules.Movement
             ReloadConfiguration();
         }
 
-        public static ConfigEntry<int> Speed;
-        public static ConfigEntry<int> Acceleration;
+        public static MelonPreferences_Entry<int> Speed;
+        public static MelonPreferences_Entry<int> Acceleration;
         protected override void ReloadConfiguration()
         {
             speedScale = Speed.Value * 2;
@@ -73,19 +73,11 @@ namespace Bark.Modules.Movement
 
         public static void BindConfigEntries()
         {
-            Speed = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "speed",
-                defaultValue: 5,
-                description: "How fast you fly"
-            );
+            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
+            category.SetFilePath(UserDataPath);
 
-            Acceleration = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "acceleration",
-                defaultValue: 5,
-                description: "How fast you accelerate"
-            );
+            Speed = category.CreateEntry("speed", 5, "Speed", "How fast you fly", false, false, null);
+            Acceleration = category.CreateEntry("acceleration", 5, "Acceleration", "How fast you accelerate", false, false, null);
         }
 
         protected override void Cleanup() { }

@@ -1,8 +1,10 @@
 ﻿using Bark.Extensions;
 using Bark.GUI;
 using Bark.Tools;
+using GorillaLibrary.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Bark.Modules.Multiplayer
@@ -15,7 +17,7 @@ namespace Bark.Modules.Multiplayer
         public static Dictionary<VRRig, bool> trackedStatus = new Dictionary<VRRig, bool>();
         void ApplyMaterial()
         {
-            foreach (var rig in GorillaParent.instance.vrrigs)
+            foreach (var rig in RigUtility.Rigs.Values.Select(rigContainer => rigContainer.Rig))
             {
                 try
                 {
@@ -35,42 +37,6 @@ namespace Bark.Modules.Multiplayer
                 }
             }
         }
-
-        void Debug()
-        {
-            foreach (var rig in GorillaParent.instance.vrrigs)
-            {
-                var chest = rig.transform.Find("rig/body/gorillachest").GetComponent<Renderer>();
-                var face = rig.transform.Find("rig/body/head/gorillaface").GetComponent<Renderer>();
-                Material[] materials = new Material[] { rig.mainSkin.material, chest.material, face.material };
-                bool xray = false;
-                foreach (var material in materials)
-                    if (material.name.Contains("X-Ray"))
-                        xray = true;
-
-                if (trackedStatus.ContainsKey(rig))
-                {
-                    if (xray != trackedStatus[rig])
-                    {
-                        Logging.Debugger("Mistracked rig:",
-                            "expected:", trackedStatus[rig],
-                            ",", rig.mainSkin.material.name.Contains("X-Ray") ? "x-ray" : "default",
-                            ",", chest.material.name.Contains("X-Ray") ? "x-ray" : "default",
-                            ",", face.material.name.Contains("X-Ray") ? "x-ray" : "default"
-                        );
-                    }
-                }
-                else if (xray)
-                {
-                    Logging.Debugger("Untracked rig has xray:",
-                        "", rig.mainSkin.material.name.Contains("X-Ray") ? "x-ray" : "default",
-                        ",", chest.material.name.Contains("X-Ray") ? "x-ray" : "default",
-                        ",", face.material.name.Contains("X-Ray") ? "x-ray" : "default"
-                    );
-                }
-            }
-        }
-
         void FixedUpdate()
         {
             if (Time.frameCount % 300 == 0) ApplyMaterial();

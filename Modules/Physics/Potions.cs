@@ -3,10 +3,12 @@ using Bark.GUI;
 using Bark.Interaction;
 using Bark.Networking;
 using Bark.Tools;
-using BepInEx.Configuration;
+using GorillaLibrary.Utilities;
 using HarmonyLib;
+using MelonLoader;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Player = GorillaLocomotion.GTPlayer;
 
@@ -50,7 +52,7 @@ namespace Bark.Modules.Physics
             try
             {
                 rig.transform.localScale = Vector3.one;
-                rig.nativeScale = rig.frameScale = rig.lastScaleFactor = 1f;
+                rig.ScaleMultiplier = 1f;
             }
             catch (Exception e)
             {
@@ -155,12 +157,12 @@ namespace Bark.Modules.Physics
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            foreach (VRRig rig in GorillaParent.instance.vrrigs)
+            foreach (VRRig rig in RigUtility.Rigs.Values.Select(rigContainer => rigContainer.Rig))
             {
                 try
                 {
                     rig.transform.localScale = Vector3.one;
-                    rig.nativeScale = rig.frameScale = rig.lastScaleFactor = 1f;
+                    rig.ScaleMultiplier = 1f;
                 }
                 catch (Exception e) { Logging.Exception(e); }
                 ;
@@ -218,17 +220,15 @@ namespace Bark.Modules.Physics
                 "Current size: {0:0.##}x", Player.Instance.scale);
         }
 
-        public static ConfigEntry<bool> ShowNetworkedSizes;
+        public static MelonPreferences_Entry<bool> ShowNetworkedSizes;
         protected override void ReloadConfiguration() { }
 
         public static void BindConfigEntries()
         {
-            ShowNetworkedSizes = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "show networked size",
-                defaultValue: true,
-                description: "Whether or not to show how big other players using the Potions module are"
-            );
+            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
+            category.SetFilePath(UserDataPath);
+
+            ShowNetworkedSizes = category.CreateEntry("showNetworkedSize", true, "Show Networked Size", "Whether or not to show how big other players using the Potions module are", false, false, null);
         }
         public static void TryGetSizeChangerForRig(VRRig rig, out SizeChanger sc)
         {

@@ -3,8 +3,9 @@ using Bark.GUI;
 using Bark.Interaction;
 using Bark.Modules.Teleportation;
 using Bark.Tools;
-using BepInEx.Configuration;
+using GorillaLibrary.Models;
 using GorillaLocomotion.Climbing;
+using MelonLoader;
 using System;
 using UnityEngine;
 using UnityEngine.XR;
@@ -91,9 +92,7 @@ namespace Bark.Modules.Movement
 
         Vector3? GetEndpoint(Vector3 origin, Vector3 forward)
         {
-            Ray ray = new Ray(origin, forward);
-            RaycastHit hit;
-            UnityEngine.Physics.Raycast(ray, out hit, Mathf.Infinity, Teleport.layerMask);
+            UnityEngine.Physics.Raycast(new(origin, forward), out RaycastHit hit, Mathf.Infinity, Teleport.layerMask);
             if (!hit.collider) return null; //if it hits nothing, return null
             return hit.point;
         }
@@ -108,9 +107,10 @@ namespace Bark.Modules.Movement
                 nail?.Obliterate();
         }
 
-        public static ConfigEntry<int> MaxNailGuns;
-        public static ConfigEntry<string> LauncherHand;
-        public static ConfigEntry<int> GravityMultiplier;
+        public static MelonPreferences_Entry<int> MaxNailGuns;
+        public static MelonPreferences_Entry<string> LauncherHand;
+        public static MelonPreferences_Entry<int> GravityMultiplier;
+
         protected override void ReloadConfiguration()
         {
             ResizeArray(MaxNailGuns.Value * 4);
@@ -174,22 +174,11 @@ namespace Bark.Modules.Movement
 
         public static void BindConfigEntries()
         {
-            MaxNailGuns = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "max nails",
-                defaultValue: 5,
-                description: "Maximum number of nails that can exist at one time (multiplied by 4)"
-            );
+            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
+            category.SetFilePath(UserDataPath);
 
-            LauncherHand = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "nailgun hand",
-                defaultValue: "left",
-                configDescription: new ConfigDescription(
-                    "Which hand holds the nail gun",
-                    new AcceptableValueList<string>("left", "right")
-                )
-            );
+            MaxNailGuns = category.CreateEntry("max nails", 5, "Max Nails", "Maximum number of nails that can exist at one time (multipled by 4)", false, false, null);
+            LauncherHand = category.CreateEntry("nailgun hand", "left", "Nail Gun Hand", "Which hand holds the nail gun", false, false, new ValueList<string>("left", "right"));
         }
 
         public override string GetDisplayName()
@@ -199,7 +188,7 @@ namespace Bark.Modules.Movement
 
         public override string Tutorial()
         {
-            string h = LauncherHand.Value.Substring(0, 1).ToUpper() + LauncherHand.Value.Substring(1);
+            string h = LauncherHand.Value[..1].ToUpper() + LauncherHand.Value[1..];
             return $"Hold [{h} Trigger] to summon the nailgun. Release [{h} Trigger] to fire a climbable nail. " +
                 $"Grip the nail to climb it.";
         }

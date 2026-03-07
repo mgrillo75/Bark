@@ -2,7 +2,9 @@
 using Bark.GUI;
 using Bark.Interaction;
 using Bark.Tools;
-using BepInEx.Configuration;
+using GorillaLibrary.Models;
+using GorillaLibrary.Utilities;
+using MelonLoader;
 using System;
 using UnityEngine;
 using Player = GorillaLocomotion.GTPlayer;
@@ -91,8 +93,8 @@ namespace Bark.Modules.Movement
             Setup();
         }
 
-        public static ConfigEntry<int> Power;
-        public static ConfigEntry<int> Volume;
+        public static MelonPreferences_Entry<int> Power;
+        public static MelonPreferences_Entry<int> Volume;
         protected override void ReloadConfiguration()
         {
             var rockets = new Rocket[] { rocketL?.GetComponent<Rocket>(), rocketR?.GetComponent<Rocket>() };
@@ -106,19 +108,11 @@ namespace Bark.Modules.Movement
 
         public static void BindConfigEntries()
         {
-            Power = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "power",
-                defaultValue: 5,
-                description: "The power of each rocket"
-            );
+            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
+            category.SetFilePath(UserDataPath);
 
-            Volume = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "thruster volume",
-                defaultValue: 10,
-                description: "How loud the thrusters sound"
-            );
+            Power = category.CreateEntry("power", 5, "Power", "The power of each rocket", false, false, null);
+            Volume = category.CreateEntry("thruster volume", 10, "Thruster Volume", "How loud the thrusters sound", false, false, null);
         }
 
         public override string GetDisplayName()
@@ -155,10 +149,8 @@ namespace Bark.Modules.Movement
             this.isLeft = isLeft;
             gt = GestureTracker.Instance;
 
-            if (isLeft)
-                gt.leftGrip.OnPressed += Attach;
-            else
-                gt.rightGrip.OnPressed += Attach;
+            if (isLeft) InputUtility.LeftGrip.OnPressed += Attach;
+            else InputUtility.RightGrip.OnPressed += Attach;
             return this;
         }
 
@@ -195,7 +187,7 @@ namespace Bark.Modules.Movement
         public override void OnDeselect(BarkInteractor interactor)
         {
             base.OnDeselect(interactor);
-            rb.linearVelocity = Player.Instance.currentVelocity;
+            rb.linearVelocity = Player.Instance.RigidbodyVelocity;
         }
 
         public void SetupInteraction()
@@ -208,8 +200,8 @@ namespace Bark.Modules.Movement
         {
             base.OnDestroy();
             if (!gt) return;
-            gt.leftGrip.OnPressed -= Attach;
-            gt.rightGrip.OnPressed -= Attach;
+            InputUtility.LeftGrip.OnPressed -= Attach;
+            InputUtility.RightGrip.OnPressed -= Attach;
         }
     }
 }

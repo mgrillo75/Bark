@@ -1,4 +1,6 @@
 ﻿using Bark.Modules;
+using GorillaLibrary.Extensions;
+using GorillaLibrary.Utilities;
 using System.Collections.Generic;
 using UnityEngine;
 using Player = GorillaLocomotion.GTPlayer;
@@ -19,21 +21,21 @@ namespace Bark.Extensions
 
         public static T GetProperty<T>(this VRRig rig, string key)
         {
-            if (rig?.rigContainer?.Creator is NetPlayer netPlayer)
+            if (rig.GetComponent<RigContainer>()?.Creator is NetPlayer netPlayer)
                 return netPlayer.GetProperty<T>(key);
             return default;
         }
 
         public static bool HasProperty(this VRRig rig, string key)
         {
-            if (rig?.rigContainer?.Creator is NetPlayer netPlayer)
+            if (rig.GetComponent<RigContainer>()?.Creator is NetPlayer netPlayer)
                 return netPlayer.HasProperty(key);
             return false;
         }
 
         public static bool ModuleEnabled(this VRRig rig, string mod)
         {
-            if (rig?.rigContainer?.Creator is NetPlayer netPlayer)
+            if (rig.GetComponent<RigContainer>()?.Creator is NetPlayer netPlayer)
                 return netPlayer.ModuleEnabled(mod);
             return false;
         }
@@ -56,11 +58,11 @@ namespace Bark.Extensions
             return enabledMods[mod];
         }
 
-        public static VRRig Rig(this Photon.Realtime.Player player) => NetPlayer.Get(player)?.Rig();
+        public static VRRig Rig(this Photon.Realtime.Player player) => player.AsNetPlayer().Rig();
 
         public static VRRig Rig(this NetPlayer netPlayer)
         {
-            return (netPlayer != null && VRRigCache.Instance.TryGetVrrig(netPlayer, out RigContainer playerRig)) ? playerRig.Rig : null;
+            return RigUtility.GetRig(netPlayer)?.Rig;
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using Bark.GUI;
-using BepInEx.Configuration;
+using MelonLoader;
 using UnityEngine;
 
 namespace Bark.Modules.Physics
@@ -29,7 +29,8 @@ namespace Bark.Modules.Physics
                 Time.timeScale = TimeScale.Value / 10f;
         }
 
-        public static ConfigEntry<int> TimeScale;
+        public static MelonPreferences_Entry<int> TimeScale;
+
         //public static void BindConfigEntries()
         //{
         //    TimeScale = Plugin.configFile.Bind(

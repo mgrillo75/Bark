@@ -3,9 +3,12 @@ using Bark.GUI;
 using Bark.Interaction;
 using Bark.Patches;
 using Bark.Tools;
+using GorillaLibrary.Models;
+using GorillaLibrary.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Player = GorillaLocomotion.GTPlayer;
 
@@ -141,10 +144,10 @@ namespace Bark.Modules.Multiplayer
             try
             {
                 ReloadConfiguration();
-                GestureTracker.Instance.leftGrip.OnPressed += OnGrip;
-                GestureTracker.Instance.rightGrip.OnPressed += OnGrip;
-                GestureTracker.Instance.leftGrip.OnReleased += OnGripReleased;
-                GestureTracker.Instance.rightGrip.OnReleased += OnGripReleased;
+                InputUtility.LeftGrip.OnPressed += OnGrip;
+                InputUtility.RightGrip.OnPressed += OnGrip;
+                InputUtility.LeftGrip.OnReleased += OnGripReleased;
+                InputUtility.RightGrip.OnReleased += OnGripReleased;
                 RigContainerPatches.OnRigCached += OnRigCached;
             }
             catch (Exception e)
@@ -164,7 +167,7 @@ namespace Bark.Modules.Multiplayer
             }
             StopAllCoroutines();
             fireflies.RemoveAll(fly => fly is null);
-            bool isLeft = tracker == GestureTracker.Instance.leftGrip;
+            bool isLeft = tracker.node == UnityEngine.XR.XRNode.LeftHand;
             var interactor = isLeft ? GestureTracker.Instance.leftPalmInteractor : GestureTracker.Instance.rightPalmInteractor;
             hand = interactor.transform;
             StartCoroutine(SpawnFireflies(hand, isLeft));
@@ -189,9 +192,9 @@ namespace Bark.Modules.Multiplayer
         void OnGripReleased(InputTracker tracker)
         {
             if (
-                tracker == GestureTracker.Instance.leftGrip && hand == GestureTracker.Instance.leftPalmInteractor.transform
+                tracker == InputUtility.LeftGrip && hand == GestureTracker.Instance.leftPalmInteractor.transform
                 ||
-                tracker == GestureTracker.Instance.rightGrip && hand == GestureTracker.Instance.rightPalmInteractor.transform)
+                tracker == InputUtility.RightGrip && hand == GestureTracker.Instance.rightPalmInteractor.transform)
             {
                 StartCoroutine(ReleaseFireflies());
             }
@@ -215,7 +218,7 @@ namespace Bark.Modules.Multiplayer
 
         IEnumerator SpawnFireflies(Transform hand, bool isLeft)
         {
-            var rigs = GorillaParent.instance.vrrigs;
+            var rigs = RigUtility.Rigs.Select(kvp => kvp.Value.Rig).ToList();
             int count = rigs.Count;
             Sounds.Play(Sounds.Sound.BeeSqueeze, .1f, isLeft);
             for (int i = 0; i < count; i++)
@@ -241,7 +244,7 @@ namespace Bark.Modules.Multiplayer
             if (!MenuController.Instance.Built) return;
             try
             {
-                if (!(fireflies is null))
+                if (fireflies is not null)
                 {
                     foreach (Firefly s in fireflies)
                         s?.Obliterate();
@@ -251,10 +254,10 @@ namespace Bark.Modules.Multiplayer
 
                 if (GestureTracker.Instance)
                 {
-                    GestureTracker.Instance.leftGrip.OnPressed -= OnGrip;
-                    GestureTracker.Instance.rightGrip.OnPressed -= OnGrip;
-                    GestureTracker.Instance.leftGrip.OnReleased -= OnGripReleased;
-                    GestureTracker.Instance.rightGrip.OnReleased -= OnGripReleased;
+                    InputUtility.LeftGrip.OnPressed -= OnGrip;
+                    InputUtility.RightGrip.OnPressed -= OnGrip;
+                    InputUtility.LeftGrip.OnReleased -= OnGripReleased;
+                    InputUtility.RightGrip.OnReleased -= OnGripReleased;
                 }
             }
             catch (Exception e) { Logging.Exception(e); }

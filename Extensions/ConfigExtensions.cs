@@ -1,4 +1,5 @@
-﻿using BepInEx.Configuration;
+﻿using Bark.Tools;
+using MelonLoader;
 using System;
 using UnityEngine;
 
@@ -12,9 +13,11 @@ namespace Bark.Extensions
             public int InitialValue;
         }
 
-        public static ConfigValueInfo ValuesInfo(this ConfigEntryBase entry)
+        public static ConfigValueInfo ValuesInfo(this MelonPreferences_Entry entry)
         {
-            if (entry.SettingType == typeof(bool))
+            Type settingType = entry.GetReflectedType();
+
+            if (settingType == typeof(bool))
             {
                 return new ConfigValueInfo
                 {
@@ -22,7 +25,7 @@ namespace Bark.Extensions
                     InitialValue = (bool)entry.BoxedValue ? 1 : 0
                 };
             }
-            else if (entry.SettingType == typeof(int))
+            else if (settingType == typeof(int))
             {
                 return new ConfigValueInfo
                 {
@@ -30,9 +33,9 @@ namespace Bark.Extensions
                     InitialValue = (int)Mathf.Clamp((int)entry.BoxedValue, 0, 10)
                 };
             }
-            else if (entry.SettingType == typeof(string))
+            else if (settingType == typeof(string))
             {
-                var acceptableValues = ((AcceptableValueList<string>)entry.Description.AcceptableValues).AcceptableValues;
+                var acceptableValues = ((ValueList<string>)entry.Validator)?.AcceptableValues;
                 for (int i = 0; i < acceptableValues.Length; i++)
                 {
                     if (acceptableValues[i] == (string)entry.BoxedValue)
@@ -43,7 +46,8 @@ namespace Bark.Extensions
                         };
                 }
             }
-            throw new Exception($"Unknown config type {entry.SettingType}");
+
+            throw new Exception($"Unknown config type {settingType.FullName}");
         }
     }
 }

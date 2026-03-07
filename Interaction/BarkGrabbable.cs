@@ -64,7 +64,7 @@ namespace Bark.Interaction
                     rb.useGravity = true;
 
                     // Apply the force to the rigidbody
-                    rb.linearVelocity = Player.Instance.currentVelocity + velEstimator.linearVelocity * throwForceMultiplier;
+                    rb.linearVelocity = Player.Instance.RigidbodyVelocity + velEstimator.linearVelocity * throwForceMultiplier;
                     rb.linearVelocity *= 1 / Player.Instance.scale;
                     rb.angularVelocity = velEstimator.angularVelocity;
                 }

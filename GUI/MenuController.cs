@@ -7,11 +7,11 @@ using Bark.Modules.Multiplayer;
 using Bark.Modules.Physics;
 using Bark.Modules.Teleportation;
 using Bark.Tools;
-using BepInEx.Configuration;
+using GorillaLibrary.Models;
+using MelonLoader;
 using Photon.Pun;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -34,8 +34,8 @@ namespace Bark.GUI
         public GameObject modPage, settingsPage;
         public Text helpText;
         public static InputTracker SummonTracker;
-        public static ConfigEntry<string> SummonInput;
-        public static ConfigEntry<string> SummonInputHand;
+        public static MelonPreferences_Entry<string> SummonInput;
+        public static MelonPreferences_Entry<string> SummonInputHand;
         bool docked;
 
         protected override void Awake()
@@ -47,7 +47,7 @@ namespace Bark.GUI
                 base.Awake();
                 this.throwOnDetach = true;
                 gameObject.AddComponent<PositionValidator>();
-                Plugin.configFile.SettingChanged += SettingsChanged;
+                MelonPreferences.OnPreferencesSaved.Subscribe(SettingsChanged);
                 modules = new List<BarkModule>()
                 {
                     // Locomotion
@@ -119,11 +119,9 @@ namespace Bark.GUI
             }
         }
 
-        void SettingsChanged(object sender, SettingChangedEventArgs e)
+        void SettingsChanged(string path)
         {
-            if (e.ChangedSetting == SummonInput ||
-                e.ChangedSetting == SummonInputHand)
-                ReloadConfiguration();
+            if (path == BarkModule.UserDataPath) ReloadConfiguration();
         }
 
         void Summon(InputTracker _) { Summon(); }
@@ -409,32 +407,18 @@ namespace Bark.GUI
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            Plugin.configFile.SettingChanged -= SettingsChanged;
+            MelonPreferences.OnPreferencesSaved.Unsubscribe(SettingsChanged);
         }
 
         public static void BindConfigEntries()
         {
             try
             {
-                ConfigDescription inputDesc = new ConfigDescription(
-                    "Which button you press to open the menu",
-                    new AcceptableValueList<string>("gesture", "stick", "a/x", "b/y")
-                );
-                SummonInput = Plugin.configFile.Bind("General",
-                    "open menu",
-                    "gesture",
-                    inputDesc
-                );
+                MelonPreferences_Category category = MelonPreferences.CreateCategory("general", "General");
+                category.SetFilePath(BarkModule.UserDataPath);
 
-                ConfigDescription handDesc = new ConfigDescription(
-                    "Which hand can open the menu",
-                    new AcceptableValueList<string>("left", "right")
-                );
-                SummonInputHand = Plugin.configFile.Bind("General",
-                    "open hand",
-                    "right",
-                    handDesc
-                );
+                SummonInput = category.CreateEntry("summonInput", "gesture", "open menu", "Which button you press to open the menu (gesture, stick, a/x, b/y)", false, false, new ValueList<string>("gesture", "stick", "a/x", "b/y"));
+                SummonInputHand = category.CreateEntry("summonInputHand", "right", "open hand", "Which hand can open the menu", false, false, new ValueList<string>("left", "right"));
             }
             catch (Exception e) { Logging.Exception(e); }
         }

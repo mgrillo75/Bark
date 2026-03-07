@@ -10,7 +10,7 @@ using Player = GorillaLocomotion.GTPlayer;
 namespace Bark.Patches
 {
     [HarmonyPatch(typeof(Player))]
-    [HarmonyPatch(nameof(Player.LateUpdate), MethodType.Normal)]
+    [HarmonyPatch("LateUpdate", MethodType.Normal)]
     internal class TeleportPatch
     {
         private static bool _isTeleporting = false, _rotate = false;

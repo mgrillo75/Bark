@@ -1,5 +1,6 @@
 ﻿using Bark.GUI;
 using Bark.Modules.Physics;
+using HarmonyLib;
 using UnityEngine;
 using Player = GorillaLocomotion.GTPlayer;
 
@@ -10,6 +11,7 @@ namespace Bark.Modules.Movement
         public static readonly string DisplayName = "Wall Run";
         private Vector3 baseGravity;
         private RaycastHit hit;
+
         void Awake()
         {
             baseGravity = UnityEngine.Physics.gravity;
@@ -24,20 +26,18 @@ namespace Bark.Modules.Movement
         protected void FixedUpdate()
         {
             Player player = Player.Instance;
+
             if (player.LeftHand.wasColliding || player.RightHand.wasColliding)
             {
-                /*
-                FieldInfo fieldInfo = typeof(Player).GetField("lastHitInfoHand", BindingFlags.NonPublic | BindingFlags.Instance);
-                hit = (RaycastHit)fieldInfo.GetValue(player);
+                hit = (RaycastHit)AccessTools.Field(typeof(Player), "lastHitInfoHand").GetValue(player);
                 UnityEngine.Physics.gravity = hit.normal * -baseGravity.magnitude * GravScale();
-                */
             }
             else
             {
-                if (Vector3.Distance(player.bodyCollider.transform.position, hit.point) > 2 * Player.Instance.scale)
-                    Cleanup();
+                if (Vector3.Distance(player.bodyCollider.transform.position, hit.point) > 2 * Player.Instance.scale) Cleanup();
             }
         }
+
         public float GravScale()
         {
             return LowGravity.Instance.active ? LowGravity.Instance.gravityScale : 1;

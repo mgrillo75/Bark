@@ -2,8 +2,10 @@
 using Bark.GUI;
 using Bark.Interaction;
 using Bark.Tools;
+using GorillaLibrary.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Player = GorillaLocomotion.GTPlayer;
 
@@ -116,7 +118,7 @@ namespace Bark.Modules.Multiplayer
         void DistributeMidichlorians()
         {
 
-            foreach (var rig in GorillaParent.instance.vrrigs)
+            foreach (var rig in RigUtility.Rigs.Values.Select(rigContainer => rigContainer.Rig))
             {
                 try
                 {

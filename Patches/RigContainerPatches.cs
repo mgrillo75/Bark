@@ -33,7 +33,7 @@ namespace Bark.Patches
             }
         }
 
-        [HarmonyPatch(nameof(RigContainer.OnDisable)), HarmonyPostfix]
+        [HarmonyPatch("OnDisable"), HarmonyPostfix]
         public static void DisablePatch(RigContainer __instance)
         {
             if (__instance.TryGetComponent<NetworkedPlayer>(out var np))

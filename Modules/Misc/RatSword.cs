@@ -2,6 +2,7 @@
 using Bark.GUI;
 using Bark.Interaction;
 using Bark.Tools;
+using GorillaLibrary.Utilities;
 using System;
 using UnityEngine;
 
@@ -24,8 +25,8 @@ namespace Bark.Modules.Misc
                 sword.transform.localRotation = Quaternion.Euler(9, 0, 0);
                 sword.transform.localScale /= 2;
                 sword.SetActive(false);
-                GestureTracker.Instance.rightGrip.OnPressed += (_) => { sword.SetActive(true); };
-                GestureTracker.Instance.rightGrip.OnReleased += (_) => { sword.SetActive(false); };
+                InputUtility.RightGrip.OnPressed += (_) => { sword.SetActive(true); };
+                InputUtility.RightGrip.OnReleased += (_) => { sword.SetActive(false); };
             }
             catch (Exception e) { Logging.Exception(e); }
         }

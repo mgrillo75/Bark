@@ -1,13 +1,14 @@
 ﻿using Bark.Extensions;
 using Bark.Tools;
-using HarmonyLib;
+using GorillaLibrary.Extensions;
+using GorillaLibrary.Models;
+using GorillaLibrary.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
-using Valve.VR;
 using Player = GorillaLocomotion.GTPlayer;
 
 namespace Bark.Interaction
@@ -15,20 +16,6 @@ namespace Bark.Interaction
     public class GestureTracker : MonoBehaviour
     {
         public static GestureTracker Instance;
-
-        public InputDevice leftController, rightController;
-
-        public InputTracker<float>
-            leftGrip, rightGrip,
-            leftTrigger, rightTrigger;
-        public InputTracker<bool>
-            leftStick, rightStick,
-            leftPrimary, rightPrimary,
-            leftSecondary, rightSecondary;
-        public InputTracker<Vector2>
-            leftStickAxis, rightStickAxis;
-
-        public List<InputTracker> inputs;
 
         public GameObject
             chest,
@@ -43,7 +30,7 @@ namespace Bark.Interaction
 
         public Transform leftPointerTransform, rightPointerTransform, leftThumbTransform, rightThumbTransform;
 
-        public const string palmPath = "GorillaPlayerNetworkedRigAnchor/rig/body/shoulder.{0}/upper_arm.{0}/forearm.{0}/hand.{0}/palm.01.{0}";
+        public const string palmPath = "palm.01.{0}";
 
         public const string pointerFingerPath = palmPath + "/f_index.01.{0}/f_index.02.{0}/f_index.03.{0}";
 
@@ -67,38 +54,7 @@ namespace Bark.Interaction
         {
             Logging.Debug("Awake");
             Instance = this;
-            leftController = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
-            rightController = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
-            var poller = Traverse.Create(ControllerInputPoller.instance);
-            var pollerExt = Traverse.Create(new ControllerInputPollerExt());
 
-            leftGrip = new InputTracker<float>(poller.Field("leftControllerGripFloat"), XRNode.LeftHand);
-            rightGrip = new InputTracker<float>(poller.Field("rightControllerGripFloat"), XRNode.RightHand);
-
-            leftTrigger = new InputTracker<float>(poller.Field("leftControllerIndexFloat"), XRNode.LeftHand);
-            rightTrigger = new InputTracker<float>(poller.Field("rightControllerIndexFloat"), XRNode.RightHand);
-
-            leftPrimary = new InputTracker<bool>(poller.Field("leftControllerPrimaryButton"), XRNode.LeftHand);
-            rightPrimary = new InputTracker<bool>(poller.Field("rightControllerPrimaryButton"), XRNode.RightHand);
-
-            leftSecondary = new InputTracker<bool>(poller.Field("leftControllerSecondaryButton"), XRNode.LeftHand);
-            rightSecondary = new InputTracker<bool>(poller.Field("rightControllerSecondaryButton"), XRNode.RightHand);
-
-            leftStick = new InputTracker<bool>(pollerExt.Field("leftControllerStickButton"), XRNode.LeftHand);
-            rightStick = new InputTracker<bool>(pollerExt.Field("rightControllerStickButton"), XRNode.RightHand);
-
-            leftStickAxis = new InputTracker<Vector2>(pollerExt.Field("leftControllerStickAxis"), XRNode.LeftHand);
-            rightStickAxis = new InputTracker<Vector2>(pollerExt.Field("rightControllerStickAxis"), XRNode.RightHand);
-
-            inputs = new List<InputTracker>()
-            {
-                leftGrip, rightGrip,
-                leftTrigger, rightTrigger,
-                leftPrimary, rightPrimary,
-                leftSecondary, rightSecondary,
-                leftStick, rightStick,
-                leftStickAxis, rightStickAxis
-            };
             BuildColliders();
             var observer = chest.AddComponent<CollisionObserver>();
             observer.OnTriggerEntered += OnChestBeat;
@@ -114,18 +70,10 @@ namespace Bark.Interaction
 
         void Update()
         {
-            ControllerInputPollerExt.Instance.Update();
-            UpdateValues();
             TrackBodyVectors();
             TrackGlideGesture();
             isIlluminatiing = TrackIlluminatiGesture();
             //isChargingKamehameha = TrackKamehamehaGesture();
-        }
-
-        public void UpdateValues()
-        {
-            foreach (var input in inputs)
-                input.UpdateValues();
         }
 
         void TrackBodyVectors()
@@ -254,7 +202,7 @@ namespace Bark.Interaction
             chest = new GameObject("Body Gesture Collider");
             chest.AddComponent<CapsuleCollider>().isTrigger = true;
             chest.AddComponent<Rigidbody>().isKinematic = true;
-            chest.transform.SetParent(player.transform.FindChildRecursive("Body Collider"), false);
+            chest.transform.SetParent(player.bodyCollider.transform, false);
             chest.layer = LayerMask.NameToLayer("Water");
             float
                 height = 1 / 8f,
@@ -262,26 +210,26 @@ namespace Bark.Interaction
             chest.transform.localScale = new Vector3(radius, height, radius);
 
 
-            var leftPalm = GorillaTagger.Instance.offlineVRRig.transform.Find(string.Format(palmPath, "L"));
+            var leftPalm = GorillaTagger.Instance.offlineVRRig.GetBone(GorillaRigBone.LeftHand).Find(string.Format(palmPath, "L"));
             leftPalmInteractor = CreateInteractor("Left Palm Interactor", leftPalm, 1 / 16f);
             leftHand = leftPalmInteractor.gameObject;
             leftHand.transform.localRotation = Quaternion.Euler(-90, -90, 0);
 
-            var rightPalm = GorillaTagger.Instance.offlineVRRig.transform.Find(string.Format(palmPath, "R"));
+            var rightPalm = GorillaTagger.Instance.offlineVRRig.GetBone(GorillaRigBone.RightHand).Find(string.Format(palmPath, "R"));
             rightPalmInteractor = CreateInteractor("Right Palm Interactor", rightPalm, 1 / 16f);
             rightHand = rightPalmInteractor.gameObject;
             rightHand.transform.localRotation = Quaternion.Euler(-90, 0, 0);
 
-            leftPointerTransform = GorillaTagger.Instance.offlineVRRig.transform.Find(string.Format(pointerFingerPath, "L"));
+            leftPointerTransform = GorillaTagger.Instance.offlineVRRig.GetBone(GorillaRigBone.LeftHand).Find(string.Format(pointerFingerPath, "L"));
             leftPointerInteractor = CreateInteractor("Left Pointer Interactor", leftPointerTransform, 1 / 32f);
             leftPointerObj = leftPointerInteractor.gameObject;
 
-            rightPointerTransform = GorillaTagger.Instance.offlineVRRig.transform.Find(string.Format(pointerFingerPath, "R"));
+            rightPointerTransform = GorillaTagger.Instance.offlineVRRig.GetBone(GorillaRigBone.RightHand).Find(string.Format(pointerFingerPath, "R"));
             rightPointerInteractor = CreateInteractor("Right Pointer Interactor", rightPointerTransform, 1 / 32f);
             rightPointerObj = rightPointerInteractor.gameObject;
 
-            leftThumbTransform = GorillaTagger.Instance.offlineVRRig.transform.Find(string.Format(thumbPath, "L"));
-            rightThumbTransform = GorillaTagger.Instance.offlineVRRig.transform.Find(string.Format(thumbPath, "R"));
+            leftThumbTransform = GorillaTagger.Instance.offlineVRRig.GetBone(GorillaRigBone.LeftHand).Find(string.Format(thumbPath, "L"));
+            rightThumbTransform = GorillaTagger.Instance.offlineVRRig.GetBone(GorillaRigBone.RightHand).Find(string.Format(thumbPath, "R"));
         }
 
         public BarkInteractor CreateInteractor(string name, Transform parent, float scale)
@@ -323,96 +271,24 @@ namespace Bark.Interaction
 
         public void HapticPulse(bool isLeft, float strength = .5f, float duration = .05f)
         {
-            var hand = isLeft ? leftController : rightController;
+            var hand = isLeft ? InputUtility.LeftController : InputUtility.RightController;
             hand.SendHapticImpulse(0u, strength, duration);
         }
 
         public InputTracker GetInputTracker(string name, XRNode node) => name switch
         {
-            "grip" => node == XRNode.LeftHand ? leftGrip : rightGrip,
-            "trigger" => node == XRNode.LeftHand ? leftTrigger : rightTrigger,
-            "stick" => node == XRNode.LeftHand ? leftStick : rightStick,
-            "primary" => node == XRNode.LeftHand ? leftPrimary : rightPrimary,
-            "secondary" => node == XRNode.LeftHand ? leftSecondary : rightSecondary,
-            "a/x" => node == XRNode.LeftHand ? leftPrimary : rightPrimary,
-            "b/y" => node == XRNode.LeftHand ? leftSecondary : rightSecondary,
-            "a" => rightPrimary,
-            "b" => rightSecondary,
-            "x" => leftPrimary,
-            "y" => leftSecondary,
+            "grip" => node == XRNode.LeftHand ? InputUtility.LeftGrip : InputUtility.RightGrip,
+            "trigger" => node == XRNode.LeftHand ? InputUtility.LeftTrigger : InputUtility.RightTrigger,
+            "stick" => node == XRNode.LeftHand ? InputUtility.LeftStickAxis : InputUtility.RightStickAxis,
+            "primary" => node == XRNode.LeftHand ? InputUtility.LeftPrimary : InputUtility.RightPrimary,
+            "secondary" => node == XRNode.LeftHand ? InputUtility.LeftSecondary : InputUtility.RightSecondary,
+            "a/x" => node == XRNode.LeftHand ? InputUtility.LeftPrimary : InputUtility.RightPrimary,
+            "b/y" => node == XRNode.LeftHand ? InputUtility.LeftSecondary : InputUtility.RightSecondary,
+            "a" => InputUtility.RightPrimary,
+            "b" => InputUtility.RightSecondary,
+            "x" => InputUtility.LeftPrimary,
+            "y" => InputUtility.LeftSecondary,
             _ => null,
         };
-    }
-
-    public abstract class InputTracker
-    {
-        public bool pressed, wasPressed;
-        public Vector3 vector3Value;
-        public Quaternion quaternionValue;
-        public XRNode node;
-        public string name;
-        public Traverse traverse;
-        public Action<InputTracker> OnPressed, OnReleased;
-
-        public abstract void UpdateValues();
-    }
-
-    public class InputTracker<T> : InputTracker
-    {
-        public InputTracker(Traverse traverse, XRNode node)
-        {
-            this.traverse = traverse;
-            this.node = node;
-        }
-
-        public T GetValue()
-        {
-            return traverse.GetValue<T>();
-        }
-        public override void UpdateValues()
-        {
-            wasPressed = pressed;
-            if (typeof(T) == typeof(bool))
-                pressed = traverse.GetValue<bool>();
-            else if (typeof(T) == typeof(float))
-                pressed = traverse.GetValue<float>() > .5f;
-
-            if (!wasPressed && pressed)
-                OnPressed?.Invoke(this);
-            if (wasPressed && !pressed)
-                OnReleased?.Invoke(this);
-        }
-    }
-
-    public class ControllerInputPollerExt
-    {
-        public bool rightControllerStickButton, leftControllerStickButton;
-        public Vector2 rightControllerStickAxis, leftControllerStickAxis;
-        public static ControllerInputPollerExt Instance;
-
-        public ControllerInputPollerExt()
-        {
-            Instance = this;
-        }
-        public void Update()
-        {
-            if (Plugin.IsSteam)
-            {
-                leftControllerStickButton = SteamVR_Actions.gorillaTag_LeftJoystickClick.state;
-                rightControllerStickButton = SteamVR_Actions.gorillaTag_RightJoystickClick.state;
-                leftControllerStickAxis = SteamVR_Actions.gorillaTag_LeftJoystick2DAxis.axis;
-                rightControllerStickAxis = SteamVR_Actions.gorillaTag_RightJoystick2DAxis.axis;
-            }
-            else
-            {
-                var left = GestureTracker.Instance.leftController;
-                var right = GestureTracker.Instance.rightController;
-                left.TryGetFeatureValue(CommonUsages.primary2DAxisClick, out leftControllerStickButton);
-                right.TryGetFeatureValue(CommonUsages.primary2DAxisClick, out rightControllerStickButton);
-                left.TryGetFeatureValue(CommonUsages.primary2DAxis, out leftControllerStickAxis);
-                right.TryGetFeatureValue(CommonUsages.primary2DAxis, out rightControllerStickAxis);
-            }
-
-        }
     }
 }

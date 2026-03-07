@@ -3,7 +3,9 @@ using Bark.GUI;
 using Bark.Interaction;
 using Bark.Patches;
 using Bark.Tools;
-using BepInEx.Configuration;
+using GorillaLibrary.Models;
+using GorillaLibrary.Utilities;
+using MelonLoader;
 using System;
 using UnityEngine;
 using Player = GorillaLocomotion.GTPlayer;
@@ -84,15 +86,13 @@ namespace Bark.Modules.Teleportation
             pearl.throwForceMultiplier = (ThrowForce.Value);
         }
 
-        public static ConfigEntry<int> ThrowForce;
+        public static MelonPreferences_Entry<int> ThrowForce;
         public static void BindConfigEntries()
         {
-            ThrowForce = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "throw force",
-                defaultValue: 5,
-                description: "How much to multiply the throw speed by on release"
-            );
+            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
+            category.SetFilePath(UserDataPath);
+
+            ThrowForce = category.CreateEntry<int>("throwForce", 5, "Throw Force", "How much to multiply the throw speed on release", false, false, null);
         }
 
         public override string GetDisplayName()
@@ -133,8 +133,8 @@ namespace Bark.Modules.Teleportation
                 rigidbody = gameObject.GetOrAddComponent<Rigidbody>();
                 rigidbody.useGravity = true;
                 gt = GestureTracker.Instance;
-                gt.rightGrip.OnPressed += Attach;
-                gt.leftGrip.OnPressed += Attach;
+                InputUtility.RightGrip.OnPressed += Attach;
+                InputUtility.LeftGrip.OnPressed += Attach;
                 mask = Player.Instance.locomotionEnabledLayers;
                 audioSource = gameObject.GetComponent<AudioSource>();
                 playerRig = GorillaTagger.Instance.offlineVRRig;
@@ -149,7 +149,7 @@ namespace Bark.Modules.Teleportation
         {
             try
             {
-                bool isLeft = (tracker == gt.leftGrip);
+                bool isLeft = tracker.node == UnityEngine.XR.XRNode.LeftHand;
                 var parent = isLeft ? gt.leftPalmInteractor : gt.rightPalmInteractor;
                 if (!this.CanBeSelected(parent)) return;
                 float dir = isLeft ? 1 : -1;
@@ -203,8 +203,8 @@ namespace Bark.Modules.Teleportation
         {
             base.OnDestroy();
             if (!gt) return;
-            gt.leftGrip.OnPressed -= Attach;
-            gt.rightGrip.OnPressed -= Attach;
+            InputUtility.LeftGrip.OnPressed -= Attach;
+            InputUtility.RightGrip.OnPressed -= Attach;
         }
     }
 }

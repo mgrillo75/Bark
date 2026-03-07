@@ -1,4 +1,6 @@
 ﻿using Bark.Tools;
+using GorillaLibrary.Models;
+using GorillaLibrary.Utilities;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -36,9 +38,7 @@ namespace Bark.Interaction
                 gameObject.layer = InteractionLayer;
 
                 var gt = GestureTracker.Instance;
-                device = IsLeft ?
-                    gt.leftController :
-                    gt.rightController;
+                device = IsLeft ? InputUtility.LeftController : InputUtility.RightController;
                 node = IsLeft ? XRNode.LeftHand : XRNode.RightHand;
 
                 gt.GetInputTracker("grip", node).OnPressed += OnGrip;

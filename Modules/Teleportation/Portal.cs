@@ -3,7 +3,8 @@ using Bark.GUI;
 using Bark.Interaction;
 using Bark.Patches;
 using Bark.Tools;
-using BepInEx.Configuration;
+using GorillaLibrary.Models;
+using MelonLoader;
 using System;
 using UnityEngine;
 using UnityEngine.XR;
@@ -215,7 +216,7 @@ namespace Bark.Modules.Teleportation
         {
             GameObject outPortal = GetConnectedPortal(inPortal);
             if (!outPortal) return;
-            float p = Player.Instance.currentVelocity.magnitude;
+            float p = Player.Instance.RigidbodyVelocity.magnitude;
             TeleportPatch.TeleportPlayer(outPortal.transform.position + (outPortal.transform.forward * 1f), false);
             Player.Instance.SetVelocity(p * outPortal.transform.forward);
         }
@@ -244,7 +245,8 @@ namespace Bark.Modules.Teleportation
             portals[1]?.Obliterate();
         }
 
-        public static ConfigEntry<string> LauncherHand;
+        public static MelonPreferences_Entry<string> LauncherHand;
+
         protected override void ReloadConfiguration()
         {
             UnsubscribeFromEvents();

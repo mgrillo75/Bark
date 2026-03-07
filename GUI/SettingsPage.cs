@@ -1,12 +1,12 @@
-﻿using Bark;
-using Bark.Extensions;
+﻿using Bark.Extensions;
 using Bark.GUI;
 using Bark.Interaction;
 using Bark.Modules;
 using Bark.Tools;
-using BepInEx.Configuration;
+using MelonLoader;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,7 +16,7 @@ public class SettingsPage : MonoBehaviour
 {
     BarkOptionWheel modSelector, configSelector;
     BarkSlider valueSlider;
-    ConfigEntryBase entry;
+    MelonPreferences_Entry entry;
 
     void Awake()
     {
@@ -55,15 +55,22 @@ public class SettingsPage : MonoBehaviour
         catch (Exception e) { Logging.Exception(e); }
     }
 
-    ConfigEntryBase GetEntry(string modName, string key)
+    MelonPreferences_Entry GetEntry(string modName, string key)
     {
-        foreach (var definition in Plugin.configFile.Keys)
+        foreach (var category in MelonPreferences.Categories)
         {
-            if (definition.Section == modName && definition.Key == key)
+            if (category.Identifier == modName || category.DisplayName == modName)
             {
-                return Plugin.configFile[definition];
+                foreach (var entry in category.Entries)
+                {
+                    if (entry.Identifier == key || entry.DisplayName == key)
+                    {
+                        return entry;
+                    }
+                }
             }
         }
+
         throw new Exception($"Could not find config entry for {modName} with key {key}");
     }
 
@@ -71,15 +78,15 @@ public class SettingsPage : MonoBehaviour
     {
         try
         {
-            List<string> configKeys = new List<string>();
-            foreach (var definition in Plugin.configFile.Keys)
+            foreach (var category in MelonPreferences.Categories)
             {
-                if (definition.Section == modName)
+                if (category.Identifier == modName || category.DisplayName == modName)
                 {
-                    configKeys.Add(Plugin.configFile[definition].Definition.Key);
+                    return [.. category.Entries.Select(entry => entry.Identifier)];
                 }
             }
-            return configKeys;
+
+            return null;
         }
         catch (Exception e)
         {
@@ -118,8 +125,8 @@ public class SettingsPage : MonoBehaviour
         MenuController.Instance.helpText.text =
             $"{modSelector.Selected} > {configSelector.Selected}\n" +
             "-----------------------------------\n" +
-            entry.Description.Description +
-            $"\n\nDefault: {entry.DefaultValue}";
+            entry.Description +
+            $"\n\nDefault: {entry.GetDefaultValueAsString()}";
     }
 }
 

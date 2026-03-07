@@ -1,7 +1,9 @@
 ﻿using Bark.GUI;
 using Bark.Interaction;
-using BepInEx.Configuration;
+using Bark.Tools;
+using GorillaLibrary.Utilities;
 using GorillaLocomotion;
+using MelonLoader;
 using UnityEngine;
 
 namespace Bark.Modules.Movement
@@ -15,12 +17,12 @@ namespace Bark.Modules.Movement
         void OnGlide(Vector3 direction)
         {
             if (!enabled) return;
-            var tracker = GestureTracker.Instance;
+
             if (
-                tracker.leftTrigger.pressed ||
-                tracker.rightTrigger.pressed ||
-                tracker.leftGrip.pressed ||
-                tracker.rightGrip.pressed) return;
+                InputUtility.LeftTrigger.pressed ||
+                InputUtility.RightTrigger.pressed ||
+                InputUtility.LeftGrip.pressed ||
+                InputUtility.RightGrip.pressed) return;
 
             var player = GTPlayer.Instance;
             if (player.LeftHand.wasColliding || player.RightHand.wasColliding) return;
@@ -28,9 +30,8 @@ namespace Bark.Modules.Movement
             if (SteerWith.Value == "head")
                 direction = player.headCollider.transform.forward;
 
-            var rigidbody = player.playerRigidBody;
             Vector3 velocity = direction * player.scale * speedScale;
-            rigidbody.linearVelocity = Vector3.Lerp(rigidbody.linearVelocity, velocity, acceleration);
+            player.SetVelocity(Vector3.Lerp(player.RigidbodyVelocity, velocity, acceleration));
         }
 
         protected override void OnEnable()
@@ -48,8 +49,8 @@ namespace Bark.Modules.Movement
             GestureTracker.Instance.OnGlide -= OnGlide;
         }
 
-        public static ConfigEntry<int> Speed;
-        public static ConfigEntry<string> SteerWith;
+        public static MelonPreferences_Entry<int> Speed;
+        public static MelonPreferences_Entry<string> SteerWith;
         protected override void ReloadConfiguration()
         {
             speedScale = Speed.Value * 2;
@@ -57,22 +58,11 @@ namespace Bark.Modules.Movement
 
         public static void BindConfigEntries()
         {
-            Speed = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "speed",
-                defaultValue: 5,
-                description: "How fast you fly"
-            );
+            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
+            category.SetFilePath(UserDataPath);
 
-            SteerWith = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "steer with",
-                defaultValue: "wrists",
-                configDescription: new ConfigDescription(
-                    "Which part of your body you use to steer",
-                    new AcceptableValueList<string>("wrists", "head")
-                )
-            );
+            Speed = category.CreateEntry("speed", 5, "Speed", "How fast you fly", false, true, null);
+            SteerWith = category.CreateEntry("steerWith", "wrists", "Steer With", "Which part of your body you use to steer", false, false, new ValueList<string>("wrists", "head"));
         }
 
         public override string GetDisplayName()

@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Bark.Patches
 {
     [HarmonyPatch(typeof(SizeManager))]
-    [HarmonyPatch(nameof(SizeManager.ControllingChanger), MethodType.Normal)]
+    [HarmonyPatch("ControllingChanger", MethodType.Normal)]
     public class SizeChangePatch
     {
         private static void Postfix(ref SizeChanger __result, Transform t)
@@ -24,9 +24,7 @@ namespace Bark.Patches
                 else if
                 (
                     !(Potions.ShowNetworkedSizes is null) &&
-                    Potions.ShowNetworkedSizes.Value &&
-                    t.GetComponentInParent<VRRig>() is VRRig rig &&
-                    rig.ModuleEnabled(Potions.DisplayName)
+                    Potions.ShowNetworkedSizes.Value && t.GetComponentInParent<VRRig>() is VRRig rig && rig.ModuleEnabled(Potions.DisplayName)
                 )
                 {
                     Potions.TryGetSizeChangerForRig(rig, out __result);

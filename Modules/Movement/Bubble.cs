@@ -3,8 +3,8 @@ using Bark.GUI;
 using Bark.Interaction;
 using Bark.Networking;
 using Bark.Tools;
-using BepInEx.Configuration;
 using GorillaLocomotion;
+using MelonLoader;
 using System;
 using UnityEngine;
 using NetworkPlayer = NetPlayer;
@@ -64,7 +64,7 @@ namespace Bark.Modules.Movement
         Rigidbody rb;
         void FixedUpdate()
         {
-            if (!rb) rb = GTPlayer.Instance.playerRigidBody;
+            if (!rb) rb = GTPlayer.Instance.GetComponent<Rigidbody>();
             rb.AddForce(-UnityEngine.Physics.gravity * rb.mass * GTPlayer.Instance.scale);
             bubble.transform.localScale = Vector3.one * GTPlayer.Instance.scale * .75f;
         }
@@ -157,22 +157,15 @@ namespace Bark.Modules.Movement
             colliderScale = MathExtensions.Map(BubbleSize.Value, 0, 10, .45f, .65f);
         }
 
-        public static ConfigEntry<int> BubbleSize;
-        public static ConfigEntry<int> BubbleSpeed;
+        public static MelonPreferences_Entry<int> BubbleSize;
+        public static MelonPreferences_Entry<int> BubbleSpeed;
         public static void BindConfigEntries()
         {
-            BubbleSize = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "bubble size",
-                defaultValue: 5,
-                description: "How far you have to reach to hit the bubble"
-            );
-            BubbleSpeed = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "bubble speed",
-                defaultValue: 5,
-                description: "How fast the bubble moves when you push it"
-            );
+            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
+            category.SetFilePath(UserDataPath);
+
+            BubbleSize = category.CreateEntry("bubble size", 5, "Bubble Size", "How far you have to reach to hit the bubble", false, false, null);
+            BubbleSpeed = category.CreateEntry("bubble speed", 5, "Bubble Speed", "How fast the bubble moves when you push it", false, false, null);
         }
 
         public override string GetDisplayName()

@@ -3,10 +3,11 @@ using Bark.GUI;
 using Bark.Interaction;
 using Bark.Modules.Teleportation;
 using Bark.Tools;
-using BepInEx.Configuration;
+using GorillaLibrary.Models;
 using GorillaLocomotion.Climbing;
 using GorillaLocomotion.Gameplay;
 using HarmonyLib;
+using MelonLoader;
 using System;
 using UnityEngine;
 using UnityEngine.XR;
@@ -32,14 +33,14 @@ namespace Bark.Modules.Movement
 
         void Awake()
         {
-
             settings = ScriptableObject.CreateInstance<GorillaZiplineSettings>();
             settings.gravityMulti = 0;
             settings.maxFriction = 0;
             settings.friction = 0;
             settings.maxSpeed *= 2;
+            settings.minSlidePitch *= 1.5f;
+            settings.minSlideVolume *= 1.5f;
         }
-
 
         protected override void OnEnable()
         {
@@ -152,26 +153,31 @@ namespace Bark.Modules.Movement
                 Transform segments = MakeSegments(start, end);
                 segments.parent = zipline.transform;
                 segments.localPosition = Vector3.zero;
+
                 // Create the spline which dictates the path you follow
+                zipline.SetActive(false);
                 BezierSpline spline = zipline.AddComponent<BezierSpline>();
                 spline.Reset();
                 Traverse.Create(spline).Field("points").SetValue(
-                     SplinePoints(zipline.transform, start, end)
+                    SplinePoints(zipline.transform, start, end)
                 );
+                zipline.SetActive(true);
+
                 //This thing does something important, I don't know what.
                 climbOffsetHelper = new GameObject("Climb Offset Helper").transform;
                 //Time to put it all together! Create the zipline controller
                 GorillaZipline gorillaZipline = zipline.AddComponent<GorillaZipline>();
                 //Assign everything to the zipline controller
                 climbOffsetHelper.SetParent(zipline.transform, false);
-                Traverse traverse = Traverse.Create(gorillaZipline);
+
+                var traverse = Traverse.Create(gorillaZipline);
                 traverse.Field("spline").SetValue(spline);
                 traverse.Field("segmentsRoot").SetValue(segments);
                 traverse.Field("slideHelper").SetValue(climbable);
                 traverse.Field("audioSlide").SetValue(audioSlide);
                 traverse.Field("climbOffsetHelper").SetValue(climbOffsetHelper);
                 traverse.Field("settings").SetValue(settings);
-                float length = (end - start).magnitude;
+                var length = (end - start).magnitude;
                 traverse.Field("ziplineDistance").SetValue(length);
                 traverse.Field("segmentDistance").SetValue(length);
 
@@ -225,6 +231,8 @@ namespace Bark.Modules.Movement
 
             audioSlide = slideHelper.AddComponent<AudioSource>(); // add an audio clip to this somehow
             audioSlide.clip = ziplineAudioLoop;
+            audioSlide.playOnAwake = false;
+            audioSlide.Stop();
         }
 
         Transform MakeSegments(Vector3 start, Vector3 end)
@@ -274,9 +282,10 @@ namespace Bark.Modules.Movement
                 zipline?.Obliterate();
         }
 
-        public static ConfigEntry<int> MaxZiplines;
-        public static ConfigEntry<string> LauncherHand;
-        public static ConfigEntry<int> GravityMultiplier;
+        public static MelonPreferences_Entry<int> MaxZiplines;
+        public static MelonPreferences_Entry<string> LauncherHand;
+        public static MelonPreferences_Entry<int> GravityMultiplier;
+
         protected override void ReloadConfiguration()
         {
             settings.gravityMulti = GravityMultiplier.Value / 5f;
@@ -343,29 +352,14 @@ namespace Bark.Modules.Movement
 
         public static void BindConfigEntries()
         {
-            MaxZiplines = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "max ziplines",
-                defaultValue: 3,
-                description: "Maximum number of ziplines that can exist at one time"
-            );
+            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
+            category.SetFilePath(UserDataPath);
 
-            LauncherHand = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "launcher hand",
-                defaultValue: "right",
-                configDescription: new ConfigDescription(
-                    "Which hand holds the launcher",
-                    new AcceptableValueList<string>("left", "right")
-                )
-            );
+            MaxZiplines = category.CreateEntry("max ziplines", 3, "Max Ziplines", "Maximum number of ziplines that can exist at one time", false, false, null);
 
-            GravityMultiplier = Plugin.configFile.Bind(
-                section: DisplayName,
-                key: "gravity multiplier",
-                defaultValue: 5,
-                description: "Gravity multiplier while on the zipline"
-            );
+            LauncherHand = category.CreateEntry("launcher hand", "right", "Launcher Hand", "Which hand holds the launcher", false, false, new ValueList<string>("left", "right"));
+
+            GravityMultiplier = category.CreateEntry("gravity multiplier", 5, "Gravity Multiplier", "Gravity multiplier while on the zipline", false, false, null);
         }
 
         public override string GetDisplayName()

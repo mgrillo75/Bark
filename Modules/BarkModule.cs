@@ -1,8 +1,10 @@
 ﻿using Bark.Networking;
 using Bark.Tools;
-using BepInEx.Configuration;
+using MelonLoader;
+using MelonLoader.Utils;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -11,19 +13,20 @@ namespace Bark.Modules
 {
     public abstract class BarkModule : MonoBehaviour
     {
-        public List<ConfigEntryBase> ConfigEntries;
+        public List<MelonPreferences_Entry> ConfigEntries;
         public static BarkModule LastEnabled;
         public static Dictionary<string, bool> enabledModules = new Dictionary<string, bool>();
         public static string enabledModulesKey = "BarkEnabledModules";
 
+        public static readonly string UserDataPath = Path.Combine(MelonEnvironment.UserDataDirectory, "Bark.cfg");
+
         protected virtual void ReloadConfiguration() { }
 
         public abstract string GetDisplayName();
-        protected void SettingsChanged(object sender, SettingChangedEventArgs e)
+
+        protected void SettingsChanged(string path)
         {
-            foreach (var field in this.GetType().GetFields())
-                if (e.ChangedSetting == field.GetValue(this))
-                    ReloadConfiguration();
+            if (path == UserDataPath) ReloadConfiguration();
         }
 
         public abstract string Tutorial();
@@ -40,15 +43,16 @@ namespace Bark.Modules
         protected virtual void OnEnable()
         {
             LastEnabled = this;
-            Plugin.configFile.SettingChanged += SettingsChanged;
+            MelonPreferences.OnPreferencesSaved.Subscribe(SettingsChanged);
             if (this.button)
                 this.button.IsPressed = true;
+
             SetStatus(true);
         }
 
         protected virtual void OnDisable()
         {
-            Plugin.configFile.SettingChanged -= SettingsChanged;
+            MelonPreferences.OnPreferencesSaved.Unsubscribe(SettingsChanged);
             if (this.button)
                 this.button.IsPressed = false;
             this.Cleanup();

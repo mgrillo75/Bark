@@ -1,6 +1,7 @@
 ﻿using Bark;
 using Bark.Interaction;
 using Bark.Tools;
+using GorillaLibrary.Utilities;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -92,7 +93,7 @@ public class ButtonController : MonoBehaviour
             OnPressed?.Invoke(this, IsPressed);
             bool isLeft = collider.name.ToLower().Contains("left");
             GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(67, isLeft, 0.05f);
-            var hand = isLeft ? GestureTracker.Instance.leftController : GestureTracker.Instance.rightController;
+            var hand = isLeft ? InputUtility.LeftController : InputUtility.RightController;
             GestureTracker.Instance.HapticPulse(isLeft);
             Plugin.menuController.AddBlockerToAllButtons(Blocker.BUTTON_PRESSED);
             Invoke(nameof(RemoveCooldownBlocker), .1f);
