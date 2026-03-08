@@ -33,7 +33,7 @@ namespace Bark.Extensions
         }
 
 
-        private static readonly Random rng = new Random();
+        private static readonly Random rng = new();
 
         public static void Shuffle<T>(this IList<T> list)
         {

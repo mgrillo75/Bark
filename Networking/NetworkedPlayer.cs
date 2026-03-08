@@ -11,7 +11,7 @@ namespace Bark.Networking
     {
         public NetPlayer owner;
         public VRRig rig;
-        readonly List<MonoBehaviour> modManagers = new List<MonoBehaviour>();
+        readonly List<MonoBehaviour> modManagers = [];
 
         public Action<NetworkedPlayer, bool> OnGripPressed, OnGripReleased;
         public bool hasBark;

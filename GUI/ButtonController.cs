@@ -14,7 +14,7 @@ public class ButtonController : MonoBehaviour
         MENU_FALLING, NOCLIP_BOUNDARY, PIGGYBACKING, BUTTON_PRESSED
     }
 
-    private readonly Dictionary<Blocker, string> blockerText = new Dictionary<Blocker, string>()
+    private readonly Dictionary<Blocker, string> blockerText = new()
     {
         {Blocker.MENU_FALLING, ""},
         {Blocker.NOCLIP_BOUNDARY, "YOU ARE TOO CLOSE TO A WALL TO ACTIVATE THIS"},
@@ -28,7 +28,7 @@ public class ButtonController : MonoBehaviour
     private float lastPressed = 0;
     public Canvas canvas;
     public Text text;
-    private readonly List<Blocker> blockers = new List<Blocker>();
+    private readonly List<Blocker> blockers = [];
     private Transform buttonModel;
     private Material material;
     private bool _isPressed;

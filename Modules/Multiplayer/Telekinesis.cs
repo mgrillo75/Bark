@@ -15,7 +15,7 @@ namespace Bark.Modules.Multiplayer
     {
         public static readonly string DisplayName = "Telekinesis";
         public static Telekinesis Instance;
-        private readonly List<TKMarker> markers = new List<TKMarker>();
+        private readonly List<TKMarker> markers = [];
         public SphereCollider tkCollider;
         ParticleSystem playerParticles, sithlordHandParticles;
         AudioSource sfx;
@@ -213,7 +213,7 @@ namespace Bark.Modules.Multiplayer
                     controllingBody = hand?.GetComponent<Rigidbody>();
                     if (!controllingBody) return false;
                     RaycastHit hit;
-                    Ray ray = new Ray(hand.position, hand.up);
+                    Ray ray = new(hand.position, hand.up);
                     Logging.Debug("DOING THE THING WITH THE COLLIDER");
                     var collider = Instance.tkCollider;
                     UnityEngine.Physics.SphereCast(ray, .2f * Player.Instance.scale, out hit, collider.gameObject.layer);

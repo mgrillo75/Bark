@@ -174,8 +174,7 @@ namespace Bark.Modules.Movement
 
         public static void BindConfigEntries()
         {
-            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
-            category.SetFilePath(UserDataPath);
+            MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory(DisplayName, DisplayName);
 
             MaxNailGuns = category.CreateEntry("max nails", 5, "Max Nails", "Maximum number of nails that can exist at one time (multipled by 4)", false, false, null);
             LauncherHand = category.CreateEntry("nailgun hand", "left", "Nail Gun Hand", "Which hand holds the nail gun", false, false, new ValueList<string>("left", "right"));

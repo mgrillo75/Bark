@@ -58,8 +58,7 @@ namespace Bark.Modules.Movement
 
         public static void BindConfigEntries()
         {
-            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
-            category.SetFilePath(UserDataPath);
+            MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory(DisplayName, DisplayName);
 
             Speed = category.CreateEntry("speed", 5, "Speed", "How fast you fly", false, true, null);
             SteerWith = category.CreateEntry("steerWith", "wrists", "Steer With", "Which part of your body you use to steer", false, false, new ValueList<string>("wrists", "head"));

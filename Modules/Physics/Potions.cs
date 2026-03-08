@@ -20,7 +20,7 @@ namespace Bark.Modules.Physics
         private GameObject bottlePrefab, shrinkPotion, growPotion;
         private Material shrinkMaterial, growMaterial;
         private Transform holsterL, holsterR;
-        private Vector3 holsterOffset = new Vector3(0.15f, -0.15f, 0.15f);
+        private Vector3 holsterOffset = new(0.15f, -0.15f, 0.15f);
         public static SizeChanger sizeChanger;
         public static Traverse sizeChangerTraverse, minScale, maxScale;
         public static Potions Instance;
@@ -28,7 +28,7 @@ namespace Bark.Modules.Physics
 
         // Networking
         public static readonly string playerSizeKey = "BarkPlayerSize";
-        public static Dictionary<VRRig, SizeChanger> sizeChangers = new Dictionary<VRRig, SizeChanger>();
+        public static Dictionary<VRRig, SizeChanger> sizeChangers = [];
 
         void Awake()
         {
@@ -225,8 +225,7 @@ namespace Bark.Modules.Physics
 
         public static void BindConfigEntries()
         {
-            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
-            category.SetFilePath(UserDataPath);
+            MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory(DisplayName, DisplayName);
 
             ShowNetworkedSizes = category.CreateEntry("showNetworkedSize", true, "Show Networked Size", "Whether or not to show how big other players using the Potions module are", false, false, null);
         }

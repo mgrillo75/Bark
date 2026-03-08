@@ -39,7 +39,7 @@ namespace Bark.Tools
                 Console.WriteLine("No bytes found in " + file);
                 return null;
             }
-            Texture2D texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            Texture2D texture = new(1, 1, TextureFormat.RGBA32, false);
             texture.LoadImage(bytes);
 
             string name = file[..file.LastIndexOf('.')];

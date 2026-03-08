@@ -228,7 +228,7 @@ namespace Bark.Modules.Teleportation
 
         RaycastHit Raycast(Vector3 origin, Vector3 forward)
         {
-            Ray ray = new Ray(origin, forward);
+            Ray ray = new(origin, forward);
             RaycastHit hit;
 
             // Shoot a ray forward

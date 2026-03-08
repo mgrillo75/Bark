@@ -260,8 +260,7 @@ namespace Bark.Modules.Movement
 
         public static void BindConfigEntries()
         {
-            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
-            category.SetFilePath(UserDataPath);
+            MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory(DisplayName, DisplayName);
 
             Sticky = category.CreateEntry("sticky", false, "Sticky", "Whether or not your hands stick to the platforms", false, false, null);
             Scale = category.CreateEntry("size", 5, "Size", "The size of the platforms", false, false, null);

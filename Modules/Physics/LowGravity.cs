@@ -43,8 +43,7 @@ namespace Bark.Modules.Physics
         public static MelonPreferences_Entry<int> Multiplier;
         public static void BindConfigEntries()
         {
-            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
-            category.SetFilePath(UserDataPath);
+            MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory(DisplayName, DisplayName);
 
             Multiplier = category.CreateEntry("multiplier", 2, "Multiplier", "How strong gravity will be (0 = no gravity, 5 = normal gravity, 10 = 2x jupiter gravity)", false, false, null);
         }

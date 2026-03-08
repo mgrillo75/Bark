@@ -21,7 +21,7 @@ namespace Bark.Tools
                 Renderer[] renderers = GameObject.FindObjectsByType<Renderer>(FindObjectsSortMode.None);
                 Logging.Debug("Found", renderers.Length, "renderers");
                 step = "Looping through renderers";
-                List<Texture> knownTextures = new List<Texture>();
+                List<Texture> knownTextures = [];
                 foreach (Renderer renderer in renderers)
                 {
                     step = "Formatting file path";

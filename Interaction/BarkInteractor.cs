@@ -15,8 +15,8 @@ namespace Bark.Interaction
         public static int InteractionLayer = LayerMask.NameToLayer(InteractionLayerName);
         public static int InteractionLayerMask = LayerMask.GetMask(InteractionLayerName);
         public List<BarkInteractable>
-            hovered = new List<BarkInteractable>(),
-            selected = new List<BarkInteractable>();
+            hovered = [],
+            selected = [];
         public InputDevice device;
         public XRNode node;
         public bool IsLeft { get; protected set; }

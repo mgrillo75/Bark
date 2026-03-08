@@ -17,7 +17,7 @@ namespace Bark.Tools
                 mesh = new Mesh();
 
                 // Create a new game object and add a mesh renderer component to it
-                GameObject polygon = new GameObject("Debug Polygon");
+                GameObject polygon = new("Debug Polygon");
                 polygon.transform.parent = this.transform;
                 renderer = polygon.AddComponent<MeshRenderer>();
                 renderer.material = Plugin.assetBundle.LoadAsset<Material>("Cloud Material");
@@ -40,9 +40,9 @@ namespace Bark.Tools
                 mesh.vertices = vertices;
                 mesh.uv = new Vector2[]
                 {
-                    new Vector2(vertices[0].x, vertices[0].y),
-                    new Vector2(vertices[1].x, vertices[1].y),
-                    new Vector2(vertices[2].x, vertices[2].y),
+                    new(vertices[0].x, vertices[0].y),
+                    new(vertices[1].x, vertices[1].y),
+                    new(vertices[2].x, vertices[2].y),
                 };
                 mesh.triangles = new int[] {
                     2, 1, 0,

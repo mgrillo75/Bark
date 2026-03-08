@@ -132,7 +132,7 @@ namespace Bark.Modules.Multiplayer
     public class Fireflies : BarkModule
     {
         public static readonly string DisplayName = "Fireflies";
-        public static List<Firefly> fireflies = new List<Firefly>();
+        public static List<Firefly> fireflies = [];
 
         bool charging = false;
         Transform hand;
@@ -182,7 +182,7 @@ namespace Bark.Modules.Multiplayer
                 float angle = (i * Mathf.PI * 2 / fireflies.Count) + Time.time;
                 float x = Mathf.Cos(angle);
                 float z = Mathf.Sin(angle);
-                Vector3 offset = new Vector3(x, z, 0);
+                Vector3 offset = new(x, z, 0);
                 var fly = fireflies[i].fly;
                 fly.transform.position = hand.transform.TransformPoint(offset * 2);
                 fly.transform.localScale = Vector3.one * Player.Instance.scale;

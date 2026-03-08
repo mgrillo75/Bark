@@ -200,13 +200,11 @@ namespace Bark.Modules.Movement
 
         Vector3[] GetEndpoints(Vector3 origin, Vector3 forward)
         {
-
             Vector3 start, end;
-            Ray ray = new Ray(origin, forward);
-            RaycastHit hit;
 
             // Shoot a ray forward
-            UnityEngine.Physics.Raycast(ray, out hit, Mathf.Infinity, Teleport.layerMask);
+            Ray ray = new(origin, forward);
+            UnityEngine.Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, Teleport.layerMask);
             if (!hit.collider) return null; //if it hits nothing, return null
             end = hit.point;
 
@@ -221,7 +219,7 @@ namespace Bark.Modules.Movement
 
         void MakeSlideHelper(Transform parent)
         {
-            GameObject slideHelper = new GameObject("SlideHelper");
+            GameObject slideHelper = new("SlideHelper");
             slideHelper.transform.SetParent(parent, false);
             slideHelper.AddComponent<GorillaSurfaceOverride>().overrideIndex = 89;
             climbable = slideHelper.AddComponent<GorillaClimbable>();
@@ -352,8 +350,7 @@ namespace Bark.Modules.Movement
 
         public static void BindConfigEntries()
         {
-            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
-            category.SetFilePath(UserDataPath);
+            MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory(DisplayName, DisplayName);
 
             MaxZiplines = category.CreateEntry("max ziplines", 3, "Max Ziplines", "Maximum number of ziplines that can exist at one time", false, false, null);
 
@@ -369,7 +366,7 @@ namespace Bark.Modules.Movement
 
         public override string Tutorial()
         {
-            string h = LauncherHand.Value.Substring(0, 1).ToUpper() + LauncherHand.Value.Substring(1);
+            string h = LauncherHand.Value[..1].ToUpper() + LauncherHand.Value[1..];
             return $"Hold [{h} Trigger] to summon the zipline cannon. Release [{h} Trigger] to fire a zipline.";
         }
     }

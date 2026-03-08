@@ -35,7 +35,7 @@ namespace Bark.Modules.Movement
         public GameObject bubble;
         public GameObject colliderObject;
         public Vector3 targetPosition;
-        public static Vector3 bubbleOffset = new Vector3(0, .15f, 0);
+        public static Vector3 bubbleOffset = new(0, .15f, 0);
 
         void Awake()
         {
@@ -161,8 +161,7 @@ namespace Bark.Modules.Movement
         public static MelonPreferences_Entry<int> BubbleSpeed;
         public static void BindConfigEntries()
         {
-            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
-            category.SetFilePath(UserDataPath);
+            MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory(DisplayName, DisplayName);
 
             BubbleSize = category.CreateEntry("bubble size", 5, "Bubble Size", "How far you have to reach to hit the bubble", false, false, null);
             BubbleSpeed = category.CreateEntry("bubble speed", 5, "Bubble Speed", "How fast the bubble moves when you push it", false, false, null);

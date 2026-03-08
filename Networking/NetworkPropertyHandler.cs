@@ -16,7 +16,7 @@ namespace Bark.Networking
         public static string versionKey = "BarkVersion";
         public Action<NetPlayer> OnPlayerJoined, OnPlayerLeft;
         public Action<NetPlayer, string, bool> OnPlayerModStatusChanged;
-        public Dictionary<NetPlayer, NetworkedPlayer> networkedPlayers = new Dictionary<NetPlayer, NetworkedPlayer>();
+        public Dictionary<NetPlayer, NetworkedPlayer> networkedPlayers = [];
 
         void Awake()
         {
@@ -59,7 +59,7 @@ namespace Bark.Networking
 
         float lastPropertyUpdate;
         const float refreshRate = 1f;
-        readonly Hashtable properties = new Hashtable();
+        readonly Hashtable properties = [];
         void FixedUpdate()
         {
             if (properties.Count == 0 || Time.time - lastPropertyUpdate < refreshRate) return;

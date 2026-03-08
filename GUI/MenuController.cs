@@ -12,6 +12,7 @@ using MelonLoader;
 using Photon.Pun;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -25,8 +26,8 @@ namespace Bark.GUI
         public static MenuController Instance;
         public bool Built { get; private set; }
         public Vector3
-            initialMenuOffset = new Vector3(0, .035f, .65f),
-            btnDimensions = new Vector3(.3f, .05f, .05f);
+            initialMenuOffset = new(0, .035f, .65f),
+            btnDimensions = new(.3f, .05f, .05f);
         public Rigidbody _rigidbody;
         private List<Transform> modPages;
         private List<ButtonController> buttons;
@@ -48,8 +49,8 @@ namespace Bark.GUI
                 this.throwOnDetach = true;
                 gameObject.AddComponent<PositionValidator>();
                 MelonPreferences.OnPreferencesSaved.Subscribe(SettingsChanged);
-                modules = new List<BarkModule>()
-                {
+                modules =
+                [
                     // Locomotion
                     gameObject.AddComponent<Airplane>(),
                     gameObject.AddComponent<Bubble>(),
@@ -86,7 +87,7 @@ namespace Bark.GUI
 
                     //// Misc
                     gameObject.AddComponent<Lobby>(),
-                };
+                ];
 
                 Halo halo = gameObject.AddComponent<Halo>();
                 if (PhotonNetwork.LocalPlayer.UserId == "JD3moEFc6tOGYSAp4MjKsIwVycfrAUR5nLkkDNSvyvE=".DecryptString())
@@ -98,8 +99,7 @@ namespace Bark.GUI
 
         private void ReloadConfiguration()
         {
-            if (SummonTracker != null)
-                SummonTracker.OnPressed -= Summon;
+            SummonTracker?.OnPressed -= Summon;
             GestureTracker.Instance.OnMeatBeat -= Summon;
 
             var hand = SummonInputHand.Value == "left"
@@ -114,14 +114,14 @@ namespace Bark.GUI
                 SummonTracker = GestureTracker.Instance.GetInputTracker(
                     SummonInput.Value, hand
                 );
-                if (SummonTracker != null)
-                    SummonTracker.OnPressed += Summon;
+
+                SummonTracker?.OnPressed += Summon;
             }
         }
 
         void SettingsChanged(string path)
         {
-            if (path == BarkModule.UserDataPath) ReloadConfiguration();
+            if (Path.GetFileName(path) == "Bark.cfg") ReloadConfiguration();
         }
 
         void Summon(InputTracker _) { Summon(); }
@@ -229,11 +229,11 @@ namespace Bark.GUI
             numPages++;
 #endif
 
-            modPages = new List<Transform>() { modPageTemplate };
+            modPages = [modPageTemplate];
             for (int i = 0; i < numPages - 1; i++)
                 modPages.Add(Instantiate(modPageTemplate, this.gameObject.transform));
 
-            buttons = new List<ButtonController>();
+            buttons = [];
             for (int i = 0; i < modules.Count; i++)
             {
                 var module = modules[i];
@@ -414,8 +414,7 @@ namespace Bark.GUI
         {
             try
             {
-                MelonPreferences_Category category = MelonPreferences.CreateCategory("general", "General");
-                category.SetFilePath(BarkModule.UserDataPath);
+                MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory("general", "General");
 
                 SummonInput = category.CreateEntry("summonInput", "gesture", "open menu", "Which button you press to open the menu (gesture, stick, a/x, b/y)", false, false, new ValueList<string>("gesture", "stick", "a/x", "b/y"));
                 SummonInputHand = category.CreateEntry("summonInputHand", "right", "open hand", "Which hand can open the menu", false, false, new ValueList<string>("left", "right"));

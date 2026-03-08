@@ -38,7 +38,7 @@ namespace Bark.Interaction
 
         // Gesture Actions
         public Action OnMeatBeat;
-        private readonly Queue<int> meatBeatCollisions = new Queue<int>();
+        private readonly Queue<int> meatBeatCollisions = new();
         private float lastBeat;
 
         public Action<Vector3> OnGlide;

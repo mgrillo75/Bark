@@ -15,7 +15,7 @@ namespace Bark.Modules.Movement
         public static readonly string DisplayName = "Grappling Hooks";
         private GameObject bananaGunPrefab, bananaGunL, bananaGunR;
         private Transform holsterL, holsterR;
-        private Vector3 holsterOffset = new Vector3(0.15f, -0.15f, 0.15f);
+        private Vector3 holsterOffset = new(0.15f, -0.15f, 0.15f);
 
         void Awake()
         {
@@ -120,8 +120,7 @@ namespace Bark.Modules.Movement
 
         public static void BindConfigEntries()
         {
-            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
-            category.SetFilePath(UserDataPath);
+            MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory(DisplayName, DisplayName);
 
             RopeType = category.CreateEntry("rope type", "elastic", "Rope Type", "Whether the rope should pull you to the anchor point or not", false, false, new ValueList<string>("elastic", "rope"));
 
@@ -208,9 +207,7 @@ namespace Bark.Modules.Movement
 
         void StartSwing()
         {
-            RaycastHit hit;
-            Ray ray = new Ray(rope.transform.position, transform.forward);
-            UnityEngine.Physics.SphereCast(ray, .5f * Player.Instance.scale, out hit, maxLength, Teleport.layerMask);
+            UnityEngine.Physics.SphereCast(new(rope.transform.position, transform.forward), .5f * Player.Instance.scale, out RaycastHit hit, maxLength, Teleport.layerMask);
             if (!hit.transform) return;
 
             isGrappling = true;
@@ -262,17 +259,14 @@ namespace Bark.Modules.Movement
         {
             if (!isGrappling && Selected)
             {
-                RaycastHit hit;
-                Ray ray = new Ray(rope.transform.position, transform.forward);
-                UnityEngine.Physics.SphereCast(ray, .5f * Player.Instance.scale, out hit, maxLength, Teleport.layerMask);
+                UnityEngine.Physics.SphereCast(new Ray(rope.transform.position, transform.forward), .5f * Player.Instance.scale, out RaycastHit hit, maxLength, Teleport.layerMask);
                 if (!hit.transform)
                 {
                     laser.enabled = false;
                     return;
                 }
-                Vector3
-                    start = Vector3.zero,
-                    end = laser.transform.InverseTransformPoint(hit.point);
+
+                Vector3 start = Vector3.zero, end = laser.transform.InverseTransformPoint(hit.point);
 
                 laser.enabled = true;
                 laser.SetPosition(0, start);

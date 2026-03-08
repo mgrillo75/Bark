@@ -108,8 +108,7 @@ namespace Bark.Modules.Movement
 
         public static void BindConfigEntries()
         {
-            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
-            category.SetFilePath(UserDataPath);
+            MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory(DisplayName, DisplayName);
 
             Power = category.CreateEntry("power", 5, "Power", "The power of each rocket", false, false, null);
             Volume = category.CreateEntry("thruster volume", 10, "Thruster Volume", "How loud the thrusters sound", false, false, null);

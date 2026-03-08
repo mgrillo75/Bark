@@ -32,8 +32,8 @@ namespace Bark.Modules.Multiplayer
         public static readonly string DisplayName = "Boxing";
         public float forceMultiplier = 50;
         private Collider punchCollider;
-        private readonly List<BoxingGlove> gloves = new List<BoxingGlove>();
-        private readonly List<VRRig> glovedRigs = new List<VRRig>();
+        private readonly List<BoxingGlove> gloves = [];
+        private readonly List<VRRig> glovedRigs = [];
 
         private float lastPunch;
 
@@ -82,7 +82,7 @@ namespace Bark.Modules.Multiplayer
                 nph.OnPlayerLeft -= OnPlayerLeft;
                 nph.OnPlayerJoined -= OnPlayerJoined;
             }
-            if (!(gloves is null))
+            if (gloves is not null)
             {
                 foreach (BoxingGlove g in gloves)
                     g?.gameObject.Obliterate();
@@ -105,7 +105,7 @@ namespace Bark.Modules.Multiplayer
             gloves.RemoveAll(g => g is null);
         }
 
-        readonly Queue<NetworkPlayer> gloveQueue = new Queue<NetworkPlayer>();
+        readonly Queue<NetworkPlayer> gloveQueue = new();
         void OnPlayerJoined(NetworkPlayer player)
         {
             Logging.Debug(player.NickName, "joined. Giving them gloves.");
@@ -207,8 +207,7 @@ namespace Bark.Modules.Multiplayer
         {
             Logging.Debug("Binding", DisplayName, "to config");
 
-            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
-            category.SetFilePath(UserDataPath);
+            MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory(DisplayName, DisplayName);
 
             PunchForce = category.CreateEntry("punch force", 5, "Punch Force", "How much force will be applied to you when punched", false, false, null);
         }

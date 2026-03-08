@@ -24,7 +24,7 @@ namespace Bark.Modules.Movement
             xz = InputUtility.LeftStickAxis.GetValue();
             y = InputUtility.RightStickAxis.GetValue().y;
 
-            Vector3 inputDirection = new Vector3(xz.x, y, xz.y);
+            Vector3 inputDirection = new(xz.x, y, xz.y);
 
             // Get the direction the player is facing but nullify the y axis component
             var playerForward = Player.Instance.bodyCollider.transform.forward;
@@ -73,8 +73,7 @@ namespace Bark.Modules.Movement
 
         public static void BindConfigEntries()
         {
-            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
-            category.SetFilePath(UserDataPath);
+            MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory(DisplayName, DisplayName);
 
             Speed = category.CreateEntry("speed", 5, "Speed", "How fast you fly", false, false, null);
             Acceleration = category.CreateEntry("acceleration", 5, "Acceleration", "How fast you accelerate", false, false, null);

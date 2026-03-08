@@ -14,8 +14,8 @@ namespace Bark.Interaction
         public Action<BarkInteractable, BarkInteractor> OnActivateEnter, OnActivateExit;
         public Action<BarkInteractable, BarkInteractor> OnPrimaryEnter, OnPrimaryExit;
         public BarkInteractor[] validSelectors;
-        public List<BarkInteractor> selectors = new List<BarkInteractor>();
-        public List<BarkInteractor> hoverers = new List<BarkInteractor>();
+        public List<BarkInteractor> selectors = [];
+        public List<BarkInteractor> hoverers = [];
         public int priority;
         public bool Activated;
         public bool Primary;

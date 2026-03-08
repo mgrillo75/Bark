@@ -100,7 +100,7 @@ public class SettingsPage : MonoBehaviour
     {
         try
         {
-            List<string> modulesWithSettings = new List<string>() { "General" };
+            List<string> modulesWithSettings = ["General"];
             foreach (var type in BarkModule.GetBarkModuleTypes())
             {
                 if (type == typeof(BarkModule)) continue;

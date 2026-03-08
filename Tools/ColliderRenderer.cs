@@ -15,7 +15,7 @@ public class ColliderRenderer : MonoBehaviour
     void Start()
     {
         refreshOffset = Random.Range(0, 60 * (int)refreshRate);
-        boxColliders = new Dictionary<Transform, BoxCollider>();
+        boxColliders = [];
         foreach (BoxCollider collider in GetComponents<BoxCollider>())
         {
             obj = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
@@ -29,7 +29,7 @@ public class ColliderRenderer : MonoBehaviour
             obj.SetParent(collider.transform);
             boxColliders.Add(obj, collider);
         }
-        sphereColliders = new Dictionary<Transform, SphereCollider>();
+        sphereColliders = [];
         foreach (SphereCollider collider in GetComponents<SphereCollider>())
         {
             obj = GameObject.CreatePrimitive(PrimitiveType.Sphere).transform;

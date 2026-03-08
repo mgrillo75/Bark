@@ -1,7 +1,6 @@
 ﻿using Bark.Networking;
 using Bark.Tools;
 using MelonLoader;
-using MelonLoader.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,10 +14,8 @@ namespace Bark.Modules
     {
         public List<MelonPreferences_Entry> ConfigEntries;
         public static BarkModule LastEnabled;
-        public static Dictionary<string, bool> enabledModules = new Dictionary<string, bool>();
+        public static Dictionary<string, bool> enabledModules = [];
         public static string enabledModulesKey = "BarkEnabledModules";
-
-        public static readonly string UserDataPath = Path.Combine(MelonEnvironment.UserDataDirectory, "Bark.cfg");
 
         protected virtual void ReloadConfiguration() { }
 
@@ -26,7 +23,7 @@ namespace Bark.Modules
 
         protected void SettingsChanged(string path)
         {
-            if (path == UserDataPath) ReloadConfiguration();
+            if (Path.GetFileName(path) == "Bark.cfg") ReloadConfiguration();
         }
 
         public abstract string Tutorial();

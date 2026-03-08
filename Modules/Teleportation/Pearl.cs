@@ -89,8 +89,7 @@ namespace Bark.Modules.Teleportation
         public static MelonPreferences_Entry<int> ThrowForce;
         public static void BindConfigEntries()
         {
-            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
-            category.SetFilePath(UserDataPath);
+            MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory(DisplayName, DisplayName);
 
             ThrowForce = category.CreateEntry<int>("throwForce", 5, "Throw Force", "How much to multiply the throw speed on release", false, false, null);
         }
@@ -169,7 +168,7 @@ namespace Bark.Modules.Teleportation
             }
         }
 
-        Ray ray = new Ray();
+        Ray ray = new();
         void FixedUpdate()
         {
             if (!thrown) return;

@@ -133,7 +133,7 @@ namespace Bark.Modules.Teleportation
                 checkpointMarker.position = checkpointPosition;
                 checkpointMarker.gameObject.SetActive(pointSet);
                 bananaLine = Instantiate(bananaLinePrefab).GetComponent<LineRenderer>();
-                markedTriggers = new List<GorillaTriggerBox>();
+                markedTriggers = [];
                 //foreach (var triggerBox in FindObjectsOfType<GorillaTriggerBox>())
                 //{
                 //    if (triggerBox?.gameObject?.GetComponent<CollisionObserver>()) continue;
@@ -185,8 +185,7 @@ namespace Bark.Modules.Teleportation
 
         public static void BindConfigEntries()
         {
-            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
-            category.SetFilePath(UserDataPath);
+            MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory(DisplayName, DisplayName);
 
             ChargeTime = category.CreateEntry("chargeTime", 5, "Charge Time", "How long it takes to charge the teleport", false, false, null);
         }

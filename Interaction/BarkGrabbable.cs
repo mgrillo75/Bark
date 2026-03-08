@@ -6,7 +6,7 @@ namespace Bark.Interaction
     public class BarkGrabbable : BarkInteractable
     {
         private Vector3 _localPos, _mirrorPos;
-        Vector3 mirrorScale = new Vector3(-1, 1, 1);
+        Vector3 mirrorScale = new(-1, 1, 1);
         public float throwForceMultiplier = 1f;
 
         public Vector3 LocalPosition

@@ -25,7 +25,7 @@ using Object = UnityEngine.Object;
 namespace Bark;
 
 [ModdedGamemode]
-public class Plugin : MelonMod
+public class Plugin : GorillaMod
 {
     public static Plugin Instance;
     public static bool initialized, inRoom;
@@ -88,8 +88,6 @@ public class Plugin : MelonMod
             }
         }
         catch (Exception e) { Logging.Exception(e); }
-
-        OnEnable();
     }
 
     public override void OnInitializeMelon()
@@ -109,7 +107,7 @@ public class Plugin : MelonMod
 
     public static Text debugText;
 
-    void OnEnable()
+    public override void OnMelonEnabled()
     {
         try
         {
@@ -124,7 +122,7 @@ public class Plugin : MelonMod
         }
     }
 
-    void OnDisable()
+    public override void OnMelonDisabled()
     {
         try
         {

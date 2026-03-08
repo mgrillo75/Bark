@@ -23,7 +23,7 @@ namespace Bark.Modules.Multiplayer
         private VRRig mountedRig;
         private bool latchedWithLeft;
         private const float mountDistance = 1.5f;
-        private Vector3 mountOffset = new Vector3(0, .05f, -.5f);
+        private Vector3 mountOffset = new(0, .05f, -.5f);
         private Vector3 mountPosition;
 
         public static Piggyback Instance;

@@ -69,13 +69,8 @@ namespace Bark.Modules.Teleportation
                     continue;
                 }
 
-                RaycastHit hit;
                 var forward = GestureTracker.Instance.headVectors.pointerDirection;
-                Ray ray = new Ray(
-                    player.headCollider.transform.position,
-                    forward
-                );
-                UnityEngine.Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask);
+                UnityEngine.Physics.Raycast(new(player.headCollider.transform.position, forward), out RaycastHit hit, Mathf.Infinity, layerMask);
                 if (!hit.transform)
                 {
                     startTime = Time.time;
@@ -152,8 +147,7 @@ namespace Bark.Modules.Teleportation
 
         public static void BindConfigEntries()
         {
-            MelonPreferences_Category category = MelonPreferences.CreateCategory(DisplayName, DisplayName);
-            category.SetFilePath(UserDataPath);
+            MelonPreferences_Category category = Melon<Plugin>.Instance.CreateCategory(DisplayName, DisplayName);
 
             ChargeTime = category.CreateEntry("chargeTime", 5, "Charge Time", "How long it takes t ocharge the teleport", false, false, null);
         }

@@ -40,7 +40,7 @@ namespace Bark.Tools
             Set(ray.origin, ray.direction);
         }
 
-        public static Dictionary<string, DebugRay> rays = new Dictionary<string, DebugRay>();
+        public static Dictionary<string, DebugRay> rays = [];
         public static DebugRay Get(string name)
         {
             if (rays.ContainsKey(name)) return rays[name];

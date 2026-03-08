@@ -14,7 +14,7 @@ namespace Bark.Modules.Multiplayer
     {
         public static readonly string DisplayName = "X-Ray";
         List<XRayMarker> markers;
-        public static Dictionary<VRRig, bool> trackedStatus = new Dictionary<VRRig, bool>();
+        public static Dictionary<VRRig, bool> trackedStatus = [];
         void ApplyMaterial()
         {
             foreach (var rig in RigUtility.Rigs.Values.Select(rigContainer => rigContainer.Rig))
@@ -46,7 +46,7 @@ namespace Bark.Modules.Multiplayer
             if (!MenuController.Instance.Built) return;
             Patches.RigContainerPatches.OnRigCached += OnRigCached;
             base.OnEnable();
-            markers = new List<XRayMarker>();
+            markers = [];
             ApplyMaterial();
         }
 
