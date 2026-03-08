@@ -44,7 +44,7 @@ namespace Bark.Modules.Movement
                 bubblePrefab = Plugin.assetBundle.LoadAsset<GameObject>("Bubble");
             }
             NetworkPropertyHandler.Instance.OnPlayerModStatusChanged += OnPlayerModStatusChanged;
-            Patches.RigContainerPatches.OnRigCached += OnRigCached;
+            NetworkPropertyHandler.OnRigCached += OnRigCached;
         }
 
         private void OnRigCached(NetPlayer player, VRRig rig)

@@ -2,6 +2,8 @@
 using Bark.GUI;
 using Bark.Interaction;
 using Bark.Tools;
+using GorillaLibrary.Extensions;
+using GorillaLibrary.Models;
 using GorillaLibrary.Utilities;
 using System;
 using System.Collections.Generic;
@@ -172,15 +174,15 @@ namespace Bark.Modules.Multiplayer
             {
                 this.rig = GetComponent<VRRig>();
                 this.uuid = count++;
-                leftHand = SetupHand("L");
-                rightHand = SetupHand("R");
+                leftHand = SetupHand(GorillaRigBone.LeftHand, "L");
+                rightHand = SetupHand(GorillaRigBone.RightHand, "R");
                 dr = new GameObject($"{uuid} (Debug Ray)").AddComponent<DebugRay>();
             }
 
-            public Transform SetupHand(string hand)
+            public Transform SetupHand(GorillaRigBone bone, string hand)
             {
-                var handTransform = transform.Find(
-                    string.Format(GestureTracker.palmPath, hand).Substring(1)
+                var handTransform = this.rig.GetBone(bone).Find(
+                    string.Format(GestureTracker.palmPath, hand)
                 );
                 var rb = handTransform.gameObject.AddComponent<Rigidbody>();
 

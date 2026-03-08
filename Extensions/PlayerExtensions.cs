@@ -1,4 +1,5 @@
 ﻿using Bark.Modules;
+using Bark.Networking;
 using GorillaLibrary.Extensions;
 using GorillaLibrary.Utilities;
 using System.Collections.Generic;
@@ -42,12 +43,14 @@ namespace Bark.Extensions
 
         public static T GetProperty<T>(this NetPlayer netPlayer, string key)
         {
-            return (T)netPlayer.GetPlayerRef()?.CustomProperties[key];
+            NetworkPropertyHandler.Instance.networkedPlayers.TryGetValue(netPlayer, out var np);
+            return np != null && np.properties != null && np.properties.ContainsKey(key) ? (T)np.properties[key] : default;
         }
 
         public static bool HasProperty(this NetPlayer netPlayer, string key)
         {
-            return !(netPlayer.GetPlayerRef()?.CustomProperties[key] is null);
+            NetworkPropertyHandler.Instance.networkedPlayers.TryGetValue(netPlayer, out var np);
+            return np != null && np.properties != null && np.properties.ContainsKey(key);
         }
 
         public static bool ModuleEnabled(this NetPlayer netPlayer, string mod)

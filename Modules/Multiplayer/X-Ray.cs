@@ -1,6 +1,8 @@
 ﻿using Bark.Extensions;
 using Bark.GUI;
+using Bark.Networking;
 using Bark.Tools;
+using GorillaLibrary.Extensions;
 using GorillaLibrary.Utilities;
 using System;
 using System.Collections.Generic;
@@ -44,7 +46,7 @@ namespace Bark.Modules.Multiplayer
         protected override void OnEnable()
         {
             if (!MenuController.Instance.Built) return;
-            Patches.RigContainerPatches.OnRigCached += OnRigCached;
+            NetworkPropertyHandler.OnRigCached += OnRigCached;
             base.OnEnable();
             markers = [];
             ApplyMaterial();
@@ -53,7 +55,7 @@ namespace Bark.Modules.Multiplayer
         protected override void Cleanup()
         {
             if (!MenuController.Instance.Built) return;
-            Patches.RigContainerPatches.OnRigCached += OnRigCached;
+            NetworkPropertyHandler.OnRigCached += OnRigCached;
             if (markers is null) return;
             foreach (var marker in markers)
             {
@@ -108,9 +110,9 @@ namespace Bark.Modules.Multiplayer
                 chestMaterial.renderQueue = 5000;
 
                 baseSkin = ReplaceMaterial(rig.mainSkin, skinMaterial);
-                chest = rig.transform.Find("rig/body/gorillachest").GetComponent<Renderer>();
+                chest = rig.GetGorilaIK().bodyBone.Find("gorillachest").GetComponent<Renderer>();
                 baseChest = ReplaceMaterial(chest, chestMaterial);
-                face = rig.transform.Find("rig/body/head/gorillaface").GetComponent<Renderer>();
+                face = rig.faceSkin;
                 baseFace = ReplaceMaterial(face, faceMaterial);
             }
             catch (Exception e) { Logging.Exception(e); }

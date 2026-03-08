@@ -35,11 +35,11 @@ namespace Bark.Modules.Physics
             try
             {
                 Instance = this;
-                NetworkPropertyHandler.Instance?.ChangeProperty(playerSizeKey, Player.Instance.scale);
+                NetworkPropertyHandler.Instance?.SetProperty(playerSizeKey, Player.Instance.scale);
                 bottlePrefab = Plugin.assetBundle.LoadAsset<GameObject>("Potion Bottle");
                 shrinkMaterial = Plugin.assetBundle.LoadAsset<Material>("Portal A Material");
                 growMaterial = Plugin.assetBundle.LoadAsset<Material>("Portal B Material");
-                Patches.RigContainerPatches.OnRigCached += OnRigCached;
+                NetworkPropertyHandler.OnRigCached += OnRigCached;
             }
             catch (Exception e)
             {
@@ -67,7 +67,7 @@ namespace Bark.Modules.Physics
                 if (!bottlePrefab)
                     bottlePrefab = Plugin.assetBundle.LoadAsset<GameObject>("Potion Bottle");
 
-                NetworkPropertyHandler.Instance?.ChangeProperty(playerSizeKey, Player.Instance.scale);
+                NetworkPropertyHandler.Instance?.SetProperty(playerSizeKey, Player.Instance.scale);
                 sizeChanger = new GameObject("Bark Size Changer").AddComponent<SizeChanger>();
                 sizeChangerTraverse = Traverse.Create(sizeChanger);
                 minScale = sizeChangerTraverse.Field("minScale");
@@ -136,7 +136,7 @@ namespace Bark.Modules.Physics
         void FixedUpdate()
         {
             if (cachedSize == Player.Instance.scale) return;
-            NetworkPropertyHandler.Instance.ChangeProperty(playerSizeKey, Player.Instance.scale);
+            NetworkPropertyHandler.Instance.SetProperty(playerSizeKey, Player.Instance.scale);
             cachedSize = Player.Instance.scale;
         }
 
@@ -181,7 +181,7 @@ namespace Bark.Modules.Physics
                         float scale = scaleFromChanger.GetValue<float>(controllingChanger.GetValue<SizeChanger>(t), t);
                         t.localScale = Vector3.one * scale;
                         manager.targetRig.ScaleMultiplier = scale;
-                        NetworkPropertyHandler.Instance?.ChangeProperty(playerSizeKey, Player.Instance.scale);
+                        NetworkPropertyHandler.Instance?.SetProperty(playerSizeKey, Player.Instance.scale);
                     }
                     else
                     {
@@ -200,7 +200,7 @@ namespace Bark.Modules.Physics
         protected override void OnEnable()
         {
             if (!MenuController.Instance.Built) return;
-            NetworkPropertyHandler.Instance.ChangeProperty(playerSizeKey, Player.Instance.scale);
+            NetworkPropertyHandler.Instance.SetProperty(playerSizeKey, Player.Instance.scale);
             base.OnEnable();
             active = false;
             Setup();

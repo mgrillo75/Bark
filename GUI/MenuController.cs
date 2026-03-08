@@ -86,7 +86,7 @@ namespace Bark.GUI
                     gameObject.AddComponent<XRay>(),
 
                     //// Misc
-                    gameObject.AddComponent<Lobby>(),
+                    // gameObject.AddComponent<Lobby>(),
                 ];
 
                 Halo halo = gameObject.AddComponent<Halo>();

@@ -1,7 +1,7 @@
 ﻿using Bark.Extensions;
 using Bark.GUI;
 using Bark.Interaction;
-using Bark.Patches;
+using Bark.Networking;
 using Bark.Tools;
 using GorillaLibrary.Models;
 using GorillaLibrary.Utilities;
@@ -148,7 +148,7 @@ namespace Bark.Modules.Multiplayer
                 InputUtility.RightGrip.OnPressed += OnGrip;
                 InputUtility.LeftGrip.OnReleased += OnGripReleased;
                 InputUtility.RightGrip.OnReleased += OnGripReleased;
-                RigContainerPatches.OnRigCached += OnRigCached;
+                NetworkPropertyHandler.OnRigCached += OnRigCached;
             }
             catch (Exception e)
             {
@@ -250,7 +250,7 @@ namespace Bark.Modules.Multiplayer
                         s?.Obliterate();
                     fireflies.Clear();
                 }
-                RigContainerPatches.OnRigCached -= OnRigCached;
+                NetworkPropertyHandler.OnRigCached -= OnRigCached;
 
                 if (GestureTracker.Instance)
                 {

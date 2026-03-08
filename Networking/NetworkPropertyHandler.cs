@@ -1,9 +1,14 @@
 ﻿using Bark.Modules;
 using Bark.Tools;
+using ExitGames.Client.Photon;
+using GorillaLibrary.Utilities;
+using MelonLoader;
 using Photon.Pun;
 using Photon.Realtime;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
@@ -11,79 +16,182 @@ namespace Bark.Networking
 {
     public class NetworkPropertyHandler : MonoBehaviourPunCallbacks
     {
-
         public static NetworkPropertyHandler Instance;
-        public static string versionKey = "BarkVersion";
+
         public Action<NetPlayer> OnPlayerJoined, OnPlayerLeft;
         public Action<NetPlayer, string, bool> OnPlayerModStatusChanged;
+
         public Dictionary<NetPlayer, NetworkedPlayer> networkedPlayers = [];
 
-        void Awake()
+        public static Action<NetPlayer, VRRig> OnRigCached;
+
+        private readonly byte eventCode = 176;
+
+        private readonly int id = StaticHash.Compute("Bark".GetStaticHash());
+
+        private readonly Hashtable _properties = [];
+        private bool _isPropertiesReady;
+        private float _propertySetTimer;
+
+        private Player[] playerArray;
+
+        public void Awake()
         {
             Instance = this;
-            ChangeProperty(versionKey, PluginInfo.Version);
+
+            PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
+
+            PhotonNetwork.LocalPlayer.SetCustomProperties(new() { { "Bark", Melon<Plugin>.Instance.Info.Version } });
+
+            GorillaLibrary.Events.Rig.OnRigAdded.Subscribe(OnRigAdded);
+            GorillaLibrary.Events.Rig.OnRigRemoved.Subscribe(OnRigRemoved);
         }
 
-        public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+        public void OnRigAdded(VRRig rig, NetPlayer netPlayer)
         {
-            base.OnPlayerPropertiesUpdate(targetPlayer, changedProps);
-            if (targetPlayer == PhotonNetwork.LocalPlayer) return;
+            if (networkedPlayers.ContainsKey(netPlayer)) return;
 
-            NetPlayer netPlayer = NetPlayer.Get(targetPlayer);
-            if (netPlayer != null && changedProps.ContainsKey(BarkModule.enabledModulesKey))
+            var np = rig.gameObject.AddComponent<NetworkedPlayer>();
+            np.owner = netPlayer;
+            np.rig = rig;
+
+            networkedPlayers.Add(netPlayer, np);
+        }
+
+        public void OnRigRemoved(VRRig rig)
+        {
+            if (rig.TryGetComponent<NetworkedPlayer>(out var np))
             {
-                networkedPlayers[netPlayer].hasBark = true;
-                var enabledModules = (Dictionary<string, bool>)changedProps[BarkModule.enabledModulesKey];
-                //Logging.Debug(targetPlayer.NickName, "toggled mods:");
-                foreach (var mod in enabledModules)
+                OnRigCached?.Invoke(np.owner, rig);
+                networkedPlayers.Remove(np.owner);
+                Destroy(np);
+            }
+        }
+
+        public void Update()
+        {
+            _propertySetTimer = Mathf.Max(_propertySetTimer - Time.unscaledDeltaTime, 0f);
+
+            if (_isPropertiesReady && _propertySetTimer <= 0)
+            {
+                _isPropertiesReady = false;
+                _propertySetTimer = 0.25f;
+
+                try
                 {
-                    //Logging.Debug(mod.Value ? "  +" : "  -", mod.Key, mod.Value);
-                    OnPlayerModStatusChanged?.Invoke(netPlayer, mod.Key, mod.Value);
+                    SendProperties(_properties, [.. from player in playerArray where IsCompatiblePlayer(player) select player]);
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
                 }
             }
         }
 
-        public override void OnPlayerLeftRoom(Player otherPlayer)
+        public NetworkPropertyHandler SetProperty(string key, object value)
         {
-            base.OnPlayerLeftRoom(otherPlayer);
+            if (_properties.ContainsKey(key)) _properties[key] = value;
+            else _properties.Add(key, value);
 
-            OnPlayerLeft?.Invoke(otherPlayer);
+            _isPropertiesReady = PhotonNetwork.InRoom || _isPropertiesReady;
+            return this;
         }
 
-        public override void OnPlayerEnteredRoom(Player newPlayer)
+        public NetworkPropertyHandler RemoveProperty(string key)
+        {
+            if (_properties.ContainsKey(key)) _properties.Remove(key);
+
+            _isPropertiesReady = PhotonNetwork.InRoom || _isPropertiesReady;
+            return this;
+        }
+
+        public void SendProperties(Hashtable properties, Player[] targetPlayers)
+        {
+            object[] content = [id, properties];
+
+            RaiseEventOptions raiseEventOptions = new()
+            {
+                TargetActors = [.. from player in targetPlayers select player.ActorNumber]
+            };
+
+            PhotonNetwork.RaiseEvent(eventCode, content, raiseEventOptions, SendOptions.SendReliable);
+        }
+
+        public bool IsCompatiblePlayer(Player _)
+        {
+            return true;
+        }
+
+        public sealed override async void OnJoinedRoom()
+        {
+            base.OnJoinedRoom();
+            playerArray = PhotonNetwork.PlayerListOthers;
+
+            await Task.Delay(PhotonNetwork.GetPing());
+            _isPropertiesReady = true;
+        }
+
+        public sealed override void OnLeftRoom()
+        {
+            base.OnLeftRoom();
+            playerArray = null;
+        }
+
+        public sealed override async void OnPlayerEnteredRoom(Player newPlayer)
         {
             base.OnPlayerEnteredRoom(newPlayer);
+            playerArray = PhotonNetwork.PlayerListOthers;
 
-            OnPlayerJoined?.Invoke(newPlayer);
-        }
+            while (RigUtility.Rigs.All(player => player.Key.ActorNumber != newPlayer.ActorNumber)) await Task.Delay(PhotonNetwork.GetPing());
 
-        float lastPropertyUpdate;
-        const float refreshRate = 1f;
-        readonly Hashtable properties = [];
-        void FixedUpdate()
-        {
-            if (properties.Count == 0 || Time.time - lastPropertyUpdate < refreshRate) return;
-            Logging.Debug($"Updated properties ({properties.Count}):");
-            foreach (var property in properties)
+            try
             {
-                Logging.Debug(property.Key, ":", property.Value);
-                if ((string)property.Key == BarkModule.enabledModulesKey)
-                    foreach (var mod in (Dictionary<string, bool>)property.Value)
-                        if (mod.Value)
-                            Logging.Debug("    ", property.Key, "is enabled");
+                SendProperties(_properties, [newPlayer]);
             }
-
-            PhotonNetwork.LocalPlayer.SetCustomProperties(properties);
-            properties.Clear();
-            lastPropertyUpdate = Time.time;
+            catch (Exception ex)
+            {
+                Logging.Exception(ex);
+            }
         }
 
-        public void ChangeProperty(string key, object value)
+        public sealed override void OnPlayerLeftRoom(Player otherPlayer)
         {
-            if (properties.ContainsKey(key))
-                properties[key] = value;
-            else
-                properties.Add(key, value);
+            base.OnPlayerLeftRoom(otherPlayer);
+            playerArray = PhotonNetwork.PlayerListOthers;
+        }
+
+        private void OnEvent(EventData data)
+        {
+            if (data.Code != eventCode) return;
+
+            object[] eventData = (object[])data.CustomData;
+
+            if (eventData.Length < 2 || eventData[0] is not int) return;
+
+            int eventId = (int)eventData[0];
+            if (eventId != id) return;
+
+            Player player = PhotonNetwork.CurrentRoom.GetPlayer(data.Sender);
+            NetPlayer netPlayer = NetworkSystem.Instance.GetPlayer(data.Sender);
+            if (player.IsLocal || !RigUtility.TryGetRig(netPlayer, out RigContainer playerRig) || !playerRig.TryGetComponent(out NetworkedPlayer networkedPlayer)) return;
+
+            if (eventData[1] is Hashtable properties)
+            {
+                networkedPlayer.properties = properties;
+
+                if (properties.ContainsKey(BarkModule.enabledModulesKey))
+                {
+                    var enabledModules = (Dictionary<string, bool>)properties[BarkModule.enabledModulesKey];
+
+                    foreach (var mod in enabledModules)
+                    {
+                        networkedPlayer.OnPlayerModStatusChanged(mod.Key, mod.Value);
+                        OnPlayerModStatusChanged?.Invoke(netPlayer, mod.Key, mod.Value);
+                    }
+                }
+
+                return;
+            }
         }
     }
 }

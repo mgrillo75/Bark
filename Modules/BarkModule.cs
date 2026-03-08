@@ -63,7 +63,7 @@ namespace Bark.Modules
                 enabledModules[name] = enabled;
             else
                 enabledModules.Add(name, enabled);
-            NetworkPropertyHandler.Instance?.ChangeProperty(enabledModulesKey, enabledModules);
+            NetworkPropertyHandler.Instance?.SetProperty(enabledModulesKey, enabledModules);
         }
 
         protected virtual void OnDestroy()

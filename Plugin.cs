@@ -47,7 +47,7 @@ public class Plugin : GorillaMod
         try
         {
             gt = _root.GetOrAddComponent<GestureTracker>();
-            nph = _root.GetOrAddComponent<NetworkPropertyHandler>();
+
             menuController = Object.Instantiate(monkeMenuPrefab).AddComponent<MenuController>();
         }
         catch (Exception e)
@@ -63,7 +63,6 @@ public class Plugin : GorillaMod
             Logging.Debug("Cleaning up");
             menuController?.gameObject?.Obliterate();
             gt?.Obliterate();
-            nph?.Obliterate();
         }
         catch (Exception e)
         {
@@ -143,6 +142,7 @@ public class Plugin : GorillaMod
         {
             _root = new GameObject("Bark");
             Object.DontDestroyOnLoad(_root);
+            nph = _root.GetOrAddComponent<NetworkPropertyHandler>();
 
             Logging.Debug("OnGameInitialized");
             initialized = true;

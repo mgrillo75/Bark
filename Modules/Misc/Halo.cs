@@ -61,7 +61,7 @@ namespace Bark.Modules.Misc
                 lightBeamPrefab = Plugin.assetBundle.LoadAsset<GameObject>("Light Beam");
             }
             NetworkPropertyHandler.Instance.OnPlayerModStatusChanged += OnPlayerModStatusChanged;
-            Patches.RigContainerPatches.OnRigCached += OnRigCached;
+            NetworkPropertyHandler.OnRigCached += OnRigCached;
         }
 
         protected override void OnEnable()

@@ -1,6 +1,7 @@
 ﻿using Bark.Extensions;
 using Bark.Modules.Movement;
 using Bark.Tools;
+using ExitGames.Client.Photon;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,8 +17,8 @@ namespace Bark.Networking
         public Action<NetworkedPlayer, bool> OnGripPressed, OnGripReleased;
         public bool hasBark;
         private bool leftGripWasPressed, rightGripWasPressed;
-        private readonly bool leftTriggerWasPressed, rightTriggerWasPressed;
-        private readonly bool leftThumbWasPressed, rightThumbWasPressed;
+
+        public Hashtable properties;
 
         public float LeftGripAmount { get; protected set; }
         public float RightGripAmount { get; protected set; }
@@ -36,25 +37,21 @@ namespace Bark.Networking
         void Start()
         {
             Logging.Debug("Created NP for", owner.NickName);
-            NetworkPropertyHandler.Instance.OnPlayerModStatusChanged += OnPlayerModStatusChanged;
         }
 
-        void OnPlayerModStatusChanged(NetPlayer player, string mod, bool enabled)
+        public void OnPlayerModStatusChanged(string mod, bool enabled)
         {
-            if (player == owner)
+            if (mod == Platforms.DisplayName)
             {
-                if (mod == Platforms.DisplayName)
+                var manager = this.gameObject.GetOrAddComponent<NetworkedPlatformsHandler>();
+                if (enabled)
                 {
-                    var manager = this.gameObject.GetOrAddComponent<NetworkedPlatformsHandler>();
-                    if (enabled)
-                    {
-                        if (!modManagers.Contains(manager))
-                            modManagers.Add(manager);
-                    }
-                    else
-                    {
-                        manager.Obliterate();
-                    }
+                    if (!modManagers.Contains(manager))
+                        modManagers.Add(manager);
+                }
+                else
+                {
+                    manager.Obliterate();
                 }
             }
         }
@@ -91,9 +88,7 @@ namespace Bark.Networking
 
         void OnDestroy()
         {
-            NetworkPropertyHandler.Instance.OnPlayerModStatusChanged -= OnPlayerModStatusChanged;
-            foreach (MonoBehaviour mb in modManagers)
-                mb?.Obliterate();
+            foreach (MonoBehaviour mb in modManagers) mb?.Obliterate();
         }
     }
 }
