@@ -18,7 +18,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-[assembly: MelonInfo(typeof(Plugin), "Bark", "1.0.0", "KyleTheScientist")]
+[assembly: MelonInfo(typeof(Plugin), "Bark", "1.5.2", "KyleTheScientist")]
 [assembly: MelonGame("Another Axiom", "Gorilla Tag")]
 [assembly: HarmonyDontPatchAll]
 
