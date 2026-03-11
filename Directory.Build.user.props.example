@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project>
+	<PropertyGroup>
+		<!-- Copy this file to Directory.Build.user.props and point GamePath at your local Steam Gorilla Tag install. -->
+		<GamePath>C:\Program Files (x86)\Steam\steamapps\common\Gorilla Tag</GamePath>
+
+		<!-- Optional overrides if your loader/runtime or GorillaLibrary files live elsewhere. -->
+		<!-- <GameAssemblyPath>$(GamePath)\Gorilla Tag_Data\Managed</GameAssemblyPath> -->
+		<!-- <MelonLoaderAssemblyPath>$(GamePath)\MelonLoader\net35</MelonLoaderAssemblyPath> -->
+		<!-- <ModsPath>$(GamePath)\Mods</ModsPath> -->
+		<!-- <GorillaLibraryPath>$(ModsPath)\GorillaLibrary.dll</GorillaLibraryPath> -->
+		<!-- <GorillaLibraryGameModesPath>$(ModsPath)\GorillaLibrary.GameModes.dll</GorillaLibraryGameModesPath> -->
+		<!-- <BarkDeployPath>$(ModsPath)</BarkDeployPath> -->
+	</PropertyGroup>
+</Project>

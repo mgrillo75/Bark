@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<Project>
-	<Target Name="CopyToPlugins" AfterTargets="Build" Condition="'$(CI)'!='TRUE'">
-		<Copy SourceFiles="$(TargetPath)" DestinationFiles="$(ModsPath)\$(TargetFileName)" />
-		<Message Text="Copied DLL to Mods" Importance="high"/>
-		<Copy SourceFiles="$(TargetDir)$(TargetName).pdb" Condition="Exists('$(TargetDir)$(TargetName).pdb')" DestinationFiles="$(ModsPath)\$(ProjectName).pdb" />
-		<Message Text="Copied PDB to Mods" Importance="high"/>
+<Project InitialTargets="ValidateBarkEnvironment">
+	<Target Name="ValidateBarkEnvironment" Condition="'$(SkipBarkEnvironmentValidation)' != 'true'">
+		<Error Condition="!Exists('$(GamePath)')" Text="GamePath '$(GamePath)' does not exist. Install the Steam build of Gorilla Tag or override GamePath in Directory.Build.user.props." />
+		<Error Condition="!Exists('$(GameAssemblyPath)')" Text="GameAssemblyPath '$(GameAssemblyPath)' does not exist. It should point to Gorilla Tag_Data\Managed." />
+		<Error Condition="!Exists('$(MelonLoaderAssemblyPath)')" Text="MelonLoaderAssemblyPath '$(MelonLoaderAssemblyPath)' does not exist. Install the PC Gorilla Tag loader/runtime expected by this branch or override the path in Directory.Build.user.props." />
+		<Error Condition="!Exists('$(GorillaLibraryPath)')" Text="GorillaLibraryPath '$(GorillaLibraryPath)' does not exist. Place GorillaLibrary.dll in the game Mods folder or override GorillaLibraryPath in Directory.Build.user.props." />
+		<Error Condition="!Exists('$(GorillaLibraryGameModesPath)')" Text="GorillaLibraryGameModesPath '$(GorillaLibraryGameModesPath)' does not exist. Place GorillaLibrary.GameModes.dll in the game Mods folder or override GorillaLibraryGameModesPath in Directory.Build.user.props." />
+	</Target>
+
+	<Target Name="CopyToMods" AfterTargets="Build" Condition="'$(CI)' != 'TRUE' and Exists('$(BarkDeployPath)')">
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BarkDeployPath)" SkipUnchangedFiles="true" />
+		<Message Text="Copied $(TargetFileName) to $(BarkDeployPath)" Importance="high" />
+		<Copy SourceFiles="$(TargetDir)$(TargetName).pdb" Condition="Exists('$(TargetDir)$(TargetName).pdb')" DestinationFiles="$(BarkDeployPath)\$(ProjectName).pdb" />
+		<Message Text="Copied $(ProjectName).pdb to $(BarkDeployPath)" Importance="high" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
 	</Target>
 </Project>

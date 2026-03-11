@@ -49,11 +49,19 @@ These modules can be useful for exploring the game world, experimenting with gam
 When you join a modded lobby, simply beat on your chest like a gorilla in an alternating fashion with both hands 4 times (LRLR or RLRL). This will summon the interface in front of you. To hide the interface, simply grab it and throw it away.
 
 ## Installation
-To use *Bark*, you will need to have [Monke Mod Manager](https://github.com/DeadlyKitten/MonkeModManager/releases) installed. 
-Make sure to check off Utilla.
-Once you have installed the mod loader, simply drop the `Bark-X.X.X.dll` file into your plugins folder.
+This branch targets **PCVR Gorilla Tag on Windows**. For Meta Quest 3, use the headset over **Link, Air Link, or Steam Link** and run the **PC Steam build** of Gorilla Tag.
 
-If you have Computer Interface installed, download and install `Bark-X.X.X.CI.dll` instead.
+1. Install Gorilla Tag from Steam.
+2. Install the PC loader/runtime expected by this branch so `MelonLoader.dll`, `0Harmony.dll`, and the rest of the managed dependencies exist under your Gorilla Tag install.
+3. Place `GorillaLibrary.dll` and `GorillaLibrary.GameModes.dll` in the game's `Mods` folder.
+4. Copy `Directory.Build.user.props.example` to `Directory.Build.user.props` if your Gorilla Tag install is not at the default Steam path.
+5. Run `.\Test-PCVR-Environment.ps1` to validate the local setup.
+6. Run `dotnet build -c Release` for a direct deploy to the configured `Mods` folder, or run `.\MakeRelease.ps1` to create a zip with a top-level `Mods` folder for distribution.
+
+The generated Bark artifact is `Bark.dll`, and the standardized install location for this branch is the game's `Mods` folder.
+
+Standalone Quest patching is not supported by this repository as-is.
+See `QUEST-STANDALONE-PORT.md` for the current Quest-native port status and tooling notes.
 
 ![Installation GIF](https://github.com/KyleTheScientist/Bark/blob/master/Marketing/HowToInstall.gif)
 

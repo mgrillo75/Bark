@@ -26,7 +26,7 @@ namespace Bark.GUI
         public static MenuController Instance;
         public bool Built { get; private set; }
         public Vector3
-            initialMenuOffset = new(0, .035f, .65f),
+            initialMenuOffset = new(0, .035f, .45f),
             btnDimensions = new(.3f, .05f, .05f);
         public Rigidbody _rigidbody;
         private List<Transform> modPages;

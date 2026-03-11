@@ -29,10 +29,10 @@
 			<HintPath>$(GameAssemblyPath)\Fusion.Runtime.dll</HintPath>
 		</Reference>
 		<Reference Include="GorillaLibrary">
-		  <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Mods\GorillaLibrary.dll</HintPath>
+		  <HintPath>$(GorillaLibraryPath)</HintPath>
 		</Reference>
 		<Reference Include="GorillaLibrary.GameModes">
-		  <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Mods\GorillaLibrary.GameModes.dll</HintPath>
+		  <HintPath>$(GorillaLibraryGameModesPath)</HintPath>
 		</Reference>
 		<Reference Include="MelonLoader">
 			<HintPath>$(MelonLoaderAssemblyPath)\MelonLoader.dll</HintPath>

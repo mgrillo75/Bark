@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Project>
 	<PropertyGroup>
-		<GamePath>C:\Program Files (x86)\Steam\steamapps\common\Gorilla Tag</GamePath>
-		<GameAssemblyPath>$(GamePath)\Gorilla Tag_Data\Managed</GameAssemblyPath>
-		<MelonLoaderAssemblyPath>$(GamePath)\MelonLoader\net35</MelonLoaderAssemblyPath>
-		<ModsPath>$(GamePath)\Mods</ModsPath>
-		<PluginsPath>$(GamePath)\Plugins</PluginsPath>
+		<DefaultGamePath>$(ProgramFiles(x86))\Steam\steamapps\common\Gorilla Tag</DefaultGamePath>
+	</PropertyGroup>
+
+	<Import Project="$(MSBuildThisFileDirectory)Directory.Build.user.props" Condition="Exists('$(MSBuildThisFileDirectory)Directory.Build.user.props')" />
+
+	<PropertyGroup>
+		<GamePath Condition="'$(GamePath)' == '' and Exists('$(DefaultGamePath)')">$(DefaultGamePath)</GamePath>
+		<GamePath Condition="'$(GamePath)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Gorilla Tag</GamePath>
+		<GameAssemblyPath Condition="'$(GameAssemblyPath)' == ''">$(GamePath)\Gorilla Tag_Data\Managed</GameAssemblyPath>
+		<MelonLoaderAssemblyPath Condition="'$(MelonLoaderAssemblyPath)' == ''">$(GamePath)\MelonLoader\net35</MelonLoaderAssemblyPath>
+		<ModsPath Condition="'$(ModsPath)' == ''">$(GamePath)\Mods</ModsPath>
+		<PluginsPath Condition="'$(PluginsPath)' == ''">$(GamePath)\Plugins</PluginsPath>
+		<GorillaLibraryPath Condition="'$(GorillaLibraryPath)' == ''">$(ModsPath)\GorillaLibrary.dll</GorillaLibraryPath>
+		<GorillaLibraryGameModesPath Condition="'$(GorillaLibraryGameModesPath)' == ''">$(ModsPath)\GorillaLibrary.GameModes.dll</GorillaLibraryGameModesPath>
+		<BarkDeployPath Condition="'$(BarkDeployPath)' == ''">$(ModsPath)</BarkDeployPath>
 	</PropertyGroup>
 </Project>
